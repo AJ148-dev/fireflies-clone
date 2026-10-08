@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "test.db"))
     monkeypatch.setenv("SEED", "0")
+    monkeypatch.setenv("GEMINI_API_KEY", "")
     from app.main import app
 
     with TestClient(app) as test_client:
@@ -186,3 +187,45 @@ def test_action_item_missing_ids_and_meeting_cascade(client):
     item_id = created["action_items"][0]["id"]
     assert client.delete(f"/api/meetings/{created['id']}").status_code == 204
     assert client.patch(f"/api/action-items/{item_id}", json={"is_done": True}).status_code == 404
+
+
+def test_paste_without_a_key_keeps_empty_notes(client):
+    created = _meeting(client, summary=None, topics=[], action_items=[])
+    assert created["notes_status"] == "skipped"
+    assert created["summary"] is None
+
+
+def test_paste_uses_gemini_notes_when_a_key_is_set(client, monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+
+    def fake_notes(transcript: str):
+        assert "Hello there" in transcript
+        return {
+            "summary": "Ava said hello.",
+            "topics": [{"title": "Greeting", "start_seconds": 1}],
+            "action_items": [{"text": "Reply"}],
+        }
+
+    monkeypatch.setattr("app.services.notes.generate_notes", fake_notes)
+    created = _meeting(client, summary=None, topics=[], action_items=[])
+    assert created["notes_status"] == "generated"
+    assert created["summary"]["body"] == "Ava said hello."
+    assert created["topics"][0]["title"] == "Greeting"
+    assert created["action_items"][0]["text"] == "Reply"
+
+
+def test_supplied_summary_is_not_replaced(client, monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr("app.services.notes.generate_notes", lambda _transcript: {"summary": "Should not be used", "topics": [], "action_items": []})
+    created = _meeting(client)
+    assert created["notes_status"] == "provided"
+    assert created["summary"]["body"] == "A short hello."
+
+
+def test_gemini_failure_still_saves_the_meeting(client, monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr("app.services.notes.generate_notes", lambda _transcript: None)
+    created = _meeting(client, summary=None, topics=[], action_items=[])
+    assert created["notes_status"] == "failed"
+    assert created["summary"] is None
+    assert created["segments"][0]["text"] == "Hello there"

@@ -14,6 +14,7 @@ from app.services.meetings import (
     list_meetings,
     update_meeting,
 )
+from app.services.notes import apply_generated_notes
 
 router = APIRouter(prefix="/meetings", tags=["meetings"])
 
@@ -34,11 +35,14 @@ def read_meetings(
 
 @router.post("", status_code=201)
 def post_meeting(payload: MeetingCreate, db: Session = Depends(get_db)):
+    data, notes_status = apply_generated_notes(payload.model_dump())
     try:
-        meeting = create_meeting(db, payload.model_dump())
+        meeting = create_meeting(db, data)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    return detail_payload(meeting)
+    body = detail_payload(meeting)
+    body["notes_status"] = notes_status
+    return body
 
 
 @router.post("/import", status_code=201)
@@ -59,24 +63,26 @@ async def import_meeting(
     except Exception as exc:
         raise HTTPException(status_code=400, detail="expected a valid title and started_at") from exc
     names = [part.strip() for part in participant_names.split(",") if part.strip()]
+    data, notes_status = apply_generated_notes(
+        {
+            "title": started.title,
+            "started_at": started.started_at,
+            "duration_seconds": started.duration_seconds,
+            "participant_names": names,
+            "transcript_format": extension,
+            "transcript_text": raw,
+            "summary": None,
+            "topics": [],
+            "action_items": [],
+        }
+    )
     try:
-        meeting = create_meeting(
-            db,
-            {
-                "title": started.title,
-                "started_at": started.started_at,
-                "duration_seconds": started.duration_seconds,
-                "participant_names": names,
-                "transcript_format": extension,
-                "transcript_text": raw,
-                "summary": None,
-                "topics": [],
-                "action_items": [],
-            },
-        )
+        meeting = create_meeting(db, data)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    return detail_payload(meeting)
+    body = detail_payload(meeting)
+    body["notes_status"] = notes_status
+    return body
 
 
 @router.get("/{meeting_id}")

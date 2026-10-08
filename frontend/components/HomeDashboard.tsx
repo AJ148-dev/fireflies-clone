@@ -111,7 +111,9 @@ export function HomeDashboard() {
         <CreateMeetingModal
           onClose={closeCreate}
           onCreated={(meeting: MeetingDetail) => {
-            toast("Meeting created");
+            if (meeting.notes_status === "generated") toast("Summary generated from the transcript");
+            else if (meeting.notes_status === "failed") toast("Meeting saved. The summary could not be generated.", "err");
+            else toast("Meeting created");
             router.push(`/meetings/${meeting.id}`);
           }}
         />

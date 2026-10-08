@@ -1,5 +1,6 @@
 .DS_Store
 frontend/.env.local
+backend/.env
 backend/.venv
 backend/fireflies.db
 backend/**/__pycache__

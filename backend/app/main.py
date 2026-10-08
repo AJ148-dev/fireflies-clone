@@ -8,6 +8,9 @@ from app.database import configure
 from app.models import Base
 from app.routers import action_items, meetings
 from app.seed import seed_if_empty
+from app.services.notes import load_env_file
+
+load_env_file()
 
 
 @asynccontextmanager

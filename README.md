@@ -87,7 +87,7 @@ Accepted transcript shapes:
 - vtt: `WEBVTT` cues. A leading `Name:` becomes the speaker. Otherwise the speaker is `Speaker`.
 - json: `[{"speaker", "start", "text", "end"?}]`. `start_seconds` is also accepted.
 
-Anything else returns 400 with the expected shape. Summaries in the seed are stored text. The app does not call a language model.
+Anything else returns 400 with the expected shape. Seeded meetings keep their stored summaries. A pasted or uploaded transcript is sent to Gemini when `GEMINI_API_KEY` is set, and the returned summary, topics, and action items are saved. If the key is missing or the call fails, the meeting is still saved with empty notes.
 
 ## Assumptions
 
@@ -95,4 +95,5 @@ Anything else returns 400 with the expected shape. Summaries in the seed are sto
 - Date filters use UTC calendar days. The date and time typed in the form are stored as that clock time in UTC, so the library date matches what was entered.
 - The hosted API needs a long-running disk for SQLite. A serverless filesystem will not keep new meetings. If the database file is missing, startup seeds the demo meetings again.
 - `DATABASE_PATH` chooses the SQLite file. `CORS_ORIGINS` is a comma-separated list. `SEED=0` skips seeding.
+- `GEMINI_API_KEY` and `GEMINI_MODEL` live in `backend/.env`. The key stays on the API. Restart the API after changing it.
 - Uploads, integrations, analytics, live transcription, and real login are labeled coming soon.
