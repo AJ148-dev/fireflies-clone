@@ -30,11 +30,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
 function ShellFrame({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const toast = useToast();
-  const [expanded, setExpanded] = useState(true);
   const [inviteOpen, setInviteOpen] = useState(true);
   const [profileOpen, setProfileOpen] = useState(false);
-  const narrow = pathname.startsWith("/meetings") || pathname.startsWith("/upgrade") || pathname.startsWith("/ask");
-  const collapsed = narrow || !expanded;
+  const collapsed = pathname.startsWith("/meetings") || pathname.startsWith("/upgrade") || pathname.startsWith("/ask");
   const pageLabel = pathname === "/ask" ? "AskFred" : pathname.startsWith("/meetings") ? "Meetings" : pathname.startsWith("/tasks") ? "Tasks" : pathname.startsWith("/analytics") ? "Analytics" : pathname.startsWith("/upgrade") ? "Plan" : pathname === "/settings" ? "Settings" : "Home";
 
   return (
@@ -48,9 +46,9 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-0 flex-1">
         <aside className={`relative flex shrink-0 flex-col border-r border-white/5 bg-[#17171a] ${collapsed ? "w-14 items-center py-2" : "w-[232px]"}`}>
           {collapsed ? (
-            <IconRail pathname={pathname} onProfile={() => setProfileOpen((open) => !open)} onExpand={narrow ? undefined : () => setExpanded(true)} />
+            <IconRail pathname={pathname} toast={toast} onProfile={() => setProfileOpen((open) => !open)} />
           ) : (
-            <WideSidebar pathname={pathname} inviteOpen={inviteOpen} onCloseInvite={() => setInviteOpen(false)} onCollapse={() => setExpanded(false)} onProfile={() => setProfileOpen((open) => !open)} toast={toast} />
+            <WideSidebar pathname={pathname} inviteOpen={inviteOpen} onCloseInvite={() => setInviteOpen(false)} onProfile={() => setProfileOpen((open) => !open)} toast={toast} />
           )}
           {profileOpen ? (
             <ProfileMenu collapsed={collapsed} onClose={() => setProfileOpen(false)} toast={toast} />
@@ -97,27 +95,77 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
   );
 }
 
-function IconRail({ pathname, onProfile, onExpand }: { pathname: string; onProfile: () => void; onExpand?: () => void }) {
-  const items = [...PRIMARY, ...SECONDARY, { href: "/upgrade", label: "Upgrade", icon: "bolt" }, { href: "/settings", label: "Settings", icon: "gear" }];
+const RAIL_MAIN = [
+  { href: "/", label: "Home", icon: "home" },
+  { href: "/ask", label: "AskFred", icon: "ask" },
+  { href: "/meetings", label: "Meetings", icon: "camera" },
+  { href: "/tasks", label: "Tasks", icon: "tasks" },
+  { href: "", label: "AI Skills", icon: "skills" },
+  { href: "/analytics", label: "Analytics", icon: "chart" },
+  { href: "", label: "Voice Agents", icon: "robot" },
+  { href: "/upgrade", label: "Upgrade", icon: "bolt", dot: true },
+];
+
+const RAIL_FOOTER = [
+  { href: "", label: "Invite", icon: "invite" },
+  { href: "", label: "Integrations", icon: "layers" },
+  { href: "/settings", label: "Settings", icon: "gear" },
+];
+
+function IconRail({
+  pathname,
+  toast,
+  onProfile,
+}: {
+  pathname: string;
+  toast: (message: string) => void;
+  onProfile: () => void;
+}) {
   return (
     <>
-      <button type="button" aria-label="Profile" onClick={onProfile} className="mb-2 grid h-7 w-7 place-items-center rounded-md bg-[#1f6f64] text-[11px] font-semibold text-white">
+      <button type="button" aria-label="Profile" onClick={onProfile} className="mb-3 grid h-7 w-7 place-items-center rounded-md bg-[#1f6f64] text-[11px] font-semibold text-white">
         A
       </button>
-      {onExpand ? (
-        <button type="button" aria-label="Expand sidebar" title="Expand sidebar" onClick={onExpand} className="mb-1 grid h-8 w-8 place-items-center rounded-lg text-[#a1a1aa] hover:bg-white/5">
-          <Icon name="panels" />
-        </button>
-      ) : null}
-      {items.filter((item) => item.href).map((item) => {
-        const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
-        return (
-          <Link key={item.label} href={item.href} title={item.label} className={`my-0.5 grid h-8 w-8 place-items-center rounded-lg ${active ? "bg-white/10 text-white" : "text-[#a1a1aa] hover:bg-white/5"}`}>
-            <Icon name={item.icon} />
-          </Link>
-        );
-      })}
+      {RAIL_MAIN.map((item) => (
+        <RailButton key={item.label} item={item} pathname={pathname} toast={toast} />
+      ))}
+      <div className="mt-auto flex flex-col items-center gap-1 pb-2">
+        {RAIL_FOOTER.map((item) => (
+          <RailButton key={item.label} item={item} pathname={pathname} toast={toast} />
+        ))}
+      </div>
     </>
+  );
+}
+
+function RailButton({
+  item,
+  pathname,
+  toast,
+}: {
+  item: { href: string; label: string; icon: string; dot?: boolean };
+  pathname: string;
+  toast: (message: string) => void;
+}) {
+  const active = item.href !== "" && (item.href === "/" ? pathname === "/" : pathname.startsWith(item.href));
+  const className = `grid h-9 w-9 place-items-center rounded-lg ${active ? "bg-[#2a2a2e] text-white" : "text-[#d4d4d8] hover:bg-white/5"}`;
+  const glyph = (
+    <span className={`relative ${item.icon === "ask" ? "text-[#a78bfa]" : ""}`}>
+      <Icon name={item.icon} />
+      {item.dot ? <span className="absolute -top-0.5 -right-1.5 h-1.5 w-1.5 rounded-full bg-[#22c55e]" /> : null}
+    </span>
+  );
+  if (!item.href) {
+    return (
+      <button type="button" title={item.label} aria-label={item.label} onClick={() => toast(`${item.label} is coming soon`)} className={className}>
+        {glyph}
+      </button>
+    );
+  }
+  return (
+    <Link href={item.href} title={item.label} aria-label={item.label} className={className}>
+      {glyph}
+    </Link>
   );
 }
 
@@ -125,14 +173,12 @@ function WideSidebar({
   pathname,
   inviteOpen,
   onCloseInvite,
-  onCollapse,
   onProfile,
   toast,
 }: {
   pathname: string;
   inviteOpen: boolean;
   onCloseInvite: () => void;
-  onCollapse: () => void;
   onProfile: () => void;
   toast: (message: string) => void;
 }) {
@@ -143,9 +189,6 @@ function WideSidebar({
           <span className="grid h-6 w-6 place-items-center rounded-md bg-[#1f6f64] text-[11px] font-semibold text-white">A</span>
           <span className="truncate text-[13px] font-medium">23/CS/075</span>
           <span className="text-[10px] text-[#a1a1aa]">▾</span>
-        </button>
-        <button type="button" aria-label="Collapse sidebar" onClick={onCollapse} className="ml-auto text-[#a1a1aa]">
-          <Icon name="panels" />
         </button>
       </div>
       <nav className="flex flex-col px-2">
@@ -311,18 +354,21 @@ function Icon({ name }: { name: string }) {
     "aria-hidden": true as const,
   };
   if (name === "home") return <svg {...props}><path d="M2.5 7.2 8 2.8l5.5 4.4V13a1 1 0 0 1-1 1h-3.2V9.5H6.7V14H3.5a1 1 0 0 1-1-1V7.2Z" /></svg>;
-  if (name === "ask") return <svg {...props}><rect x="4" y="4" width="8" height="7" rx="3" /><path d="M6.5 7h.1M9.5 7h.1M8 2.2v1.6M5.2 12.2 6.2 11M10.8 12.2 9.8 11" /></svg>;
+  if (name === "ask") return <svg {...props}><circle cx="8" cy="8.4" r="3.1" /><path d="M8 5.2V3.1" /><circle cx="8" cy="2.5" r="0.7" fill="currentColor" stroke="none" /><circle cx="6.8" cy="8.2" r="0.45" fill="currentColor" stroke="none" /><circle cx="9.2" cy="8.2" r="0.45" fill="currentColor" stroke="none" /></svg>;
   if (name === "bolt") return <svg {...props}><path d="M9 1.8 4.2 9h3.2L6.8 14.2 12 6.6H8.6L9 1.8Z" /></svg>;
   if (name === "headset") return <svg {...props}><path d="M3 8.5a5 5 0 0 1 10 0" /><rect x="2.2" y="8" width="2.4" height="4" rx="1" /><rect x="11.4" y="8" width="2.4" height="4" rx="1" /></svg>;
   if (name === "puzzle") return <svg {...props}><path d="M6 2.5h3.2v2.1a1.4 1.4 0 1 0 0 2.6V9H6.2V7.2a1.4 1.4 0 1 1 0-2.6V2.5Z" /><path d="M9.2 9H13v3.2h-2.1a1.4 1.4 0 1 0-2.6 0H6V9" /></svg>;
   if (name === "camera") return <svg {...props}><rect x="1.8" y="4" width="8.2" height="8" rx="1.3" /><path d="M10 6.8 14.2 4.6v6.8L10 9.2" /></svg>;
   if (name === "tasks") return <svg {...props}><path d="M3 4.2h10M3 8h10M3 11.8h6" /></svg>;
-  if (name === "skills") return <svg {...props}><path d="M8 2.2 8.7 5l2.8.7-2.8.7L8 9.2 7.3 6.4 4.5 5.7 7.3 5 8 2.2ZM12 9.2l.4 1.4 1.4.4-1.4.4-.4 1.4-.4-1.4-1.4-.4 1.4-.4.4-1.4Z" /></svg>;
+  if (name === "skills") return <svg {...props}><path d="M8 1.8 9.1 6.2 13.4 8 9.1 9.8 8 14.2 6.9 9.8 2.6 8 6.9 6.2 8 1.8Z" /></svg>;
   if (name === "chart") return <svg {...props}><path d="M3 13V8.5M8 13V3.5M13 13V6.5" /></svg>;
   if (name === "wave") return <svg {...props}><path d="M1.8 8h1M4.2 5.2v5.6M6.6 3.2v9.6M9 5.6v4.8M11.4 4.4v7.2M13.8 7v2" /></svg>;
   if (name === "upgrade") return <svg {...props}><path d="M8 2.4 13.2 13H2.8L8 2.4Z" /></svg>;
   if (name === "plug") return <svg {...props}><path d="M6 2.2v2.6M10 2.2v2.6M4.2 4.8h7.6v3.1a3.8 3.8 0 0 1-7.6 0V4.8Z" /></svg>;
-  if (name === "gear") return <svg {...props}><circle cx="8" cy="8" r="2" /><path d="M8 2.1v1.5M8 12.4v1.5M2.1 8h1.5M12.4 8h1.5M3.9 3.9l1.1 1.1M11 11l1.1 1.1M12.1 3.9 11 5M5 11l-1.1 1.1" /></svg>;
+  if (name === "robot") return <svg {...props}><rect x="3.6" y="5.2" width="8.8" height="7" rx="2" /><path d="M8 5.2V3" /><circle cx="8" cy="2.4" r="0.7" fill="currentColor" stroke="none" /><circle cx="6.3" cy="8.2" r="0.5" fill="currentColor" stroke="none" /><circle cx="9.7" cy="8.2" r="0.5" fill="currentColor" stroke="none" /></svg>;
+  if (name === "invite") return <svg {...props}><circle cx="6" cy="5" r="1.7" /><path d="M2.6 12.4c.5-2.1 1.8-3.2 3.4-3.2s2.9 1.1 3.4 3.2" /><path d="M11.2 6.4v3.4M9.5 8.1h3.4" /></svg>;
+  if (name === "layers") return <svg {...props}><rect x="2.2" y="2.2" width="7.4" height="7.4" rx="1.4" /><rect x="6.4" y="6.4" width="7.4" height="7.4" rx="1.4" /></svg>;
+  if (name === "gear") return <svg {...props}><path d="M6.7 1.8h2.6l.3 1.5c.4.1.8.3 1.1.6l1.4-.6 1.3 2.2-1.1 1.1c.1.4.1.7 0 1.1l1.1 1-1.3 2.3-1.4-.6c-.3.3-.7.5-1.1.6l-.3 1.5H6.7l-.3-1.5a3.6 3.6 0 0 1-1.1-.6l-1.4.6-1.3-2.2 1.1-1.1a3.6 3.6 0 0 1 0-1.1L2.6 5.5l1.3-2.2 1.4.6c.3-.3.7-.5 1.1-.6l.3-1.5Z" /><circle cx="8" cy="8" r="1.5" /></svg>;
   if (name === "bell") return <svg {...props}><path d="M4 11.4h8l-.8-1.1V7.1a3.2 3.2 0 0 0-6.4 0v3.2L4 11.4Z" /><path d="M6.7 12.5a1.3 1.3 0 0 0 2.6 0" /></svg>;
   if (name === "capture") return <svg {...props}><rect x="2.2" y="3.2" width="11.6" height="9.6" rx="1.4" /><path d="M6.2 8h3.6M8 6.2v3.6" /></svg>;
   return <svg {...props}><rect x="2" y="2" width="5" height="5" rx="1" /><rect x="9" y="2" width="5" height="5" rx="1" /><rect x="2" y="9" width="5" height="5" rx="1" /><rect x="9" y="9" width="5" height="5" rx="1" /></svg>;
