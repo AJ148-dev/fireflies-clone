@@ -36,6 +36,8 @@ def test_paste_create_survives_reload(client):
     body = again.json()
     assert body["segments"][0]["text"] == "Hello there"
     assert body["summary"]["body"] == "A short hello."
+    assert body["topics"][0]["title"] == "Hello"
+    assert body["topics"][0]["start_seconds"] == 1
     assert body["action_items"][0]["is_done"] is False
     assert body["participants"][0]["name"] == "Ava Shah"
 
@@ -92,3 +94,21 @@ def test_action_item_toggle(client):
     assert added.status_code == 201
     detail = client.get(f"/api/meetings/{created['id']}").json()
     assert [item["text"] for item in detail["action_items"]] == ["Follow up tomorrow", "Second task"]
+
+    assert client.post(f"/api/meetings/{created['id']}/action-items", json={"text": "   "}).status_code == 422
+    assert client.patch(f"/api/action-items/{item_id}", json={"text": "   "}).status_code == 422
+
+    assert client.delete(f"/api/action-items/{item_id}").status_code == 204
+    detail = client.get(f"/api/meetings/{created['id']}").json()
+    assert [item["text"] for item in detail["action_items"]] == ["Second task"]
+
+
+def test_action_item_missing_ids_and_meeting_cascade(client):
+    assert client.post("/api/meetings/999/action-items", json={"text": "Missing"}).status_code == 404
+    assert client.patch("/api/action-items/999", json={"is_done": True}).status_code == 404
+    assert client.delete("/api/action-items/999").status_code == 404
+
+    created = _meeting(client)
+    item_id = created["action_items"][0]["id"]
+    assert client.delete(f"/api/meetings/{created['id']}").status_code == 204
+    assert client.patch(f"/api/action-items/{item_id}", json={"is_done": True}).status_code == 404

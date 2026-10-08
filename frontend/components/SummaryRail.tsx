@@ -59,7 +59,14 @@ export function SummaryRail({
       <div id="outline" className="mx-auto flex w-full max-w-3xl flex-col gap-8 overflow-y-auto px-8 py-4">
         {sections.map((section, index) => (
           <section key={section.title}>
-            <h2 className="text-lg font-semibold">{section.title}</h2>
+            <div className="flex items-baseline gap-2">
+              <h2 className="text-lg font-semibold">{section.title}</h2>
+              {section.start !== null ? (
+                <button type="button" onClick={() => onSeek(section.start!)} className="text-xs text-[#a78bfa]">
+                  {formatStamp(section.start)}
+                </button>
+              ) : null}
+            </div>
             <p className="mt-2 text-sm leading-6 text-[#d4d4d8]">{index === 0 ? meeting.summary?.body || section.lead : section.lead}</p>
             {section.bullets.length > 0 ? (
               <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-[#e4e4e7]">
@@ -91,15 +98,19 @@ export function SummaryRail({
                 }}
                 onEditingText={setEditingText}
                 onToggle={() => run(() => api(`/action-items/${item.id}`, { method: "PATCH", body: JSON.stringify({ is_done: !item.is_done }) }))}
-                onSave={() =>
-                  run(async () => {
+                onSave={() => {
+                  if (!editingText.trim()) {
+                    onError("Action item text cannot be blank");
+                    return;
+                  }
+                  void run(async () => {
                     await api(`/action-items/${item.id}`, {
                       method: "PATCH",
                       body: JSON.stringify({ text: editingText.trim() }),
                     });
                     setEditingId(null);
-                  })
-                }
+                  });
+                }}
                 onDelete={() => run(() => api(`/action-items/${item.id}`, { method: "DELETE" }))}
               />
             ))}
@@ -133,7 +144,7 @@ export function SummaryRail({
 function noteSections(meeting: MeetingDetail) {
   const topics = [...meeting.topics].sort((a, b) => (a.start_seconds ?? 0) - (b.start_seconds ?? 0));
   if (topics.length === 0) {
-    return [{ title: meeting.title, lead: meeting.summary?.body || "No summary for this meeting.", bullets: [] }];
+    return [{ title: meeting.title, start: null, lead: meeting.summary?.body || "No summary for this meeting.", bullets: [] }];
   }
   return topics.map((topic, index) => {
     const start = topic.start_seconds ?? 0;
@@ -143,6 +154,7 @@ function noteSections(meeting: MeetingDetail) {
     const shown = index === 0 ? lines : rest;
     return {
       title: topic.title,
+      start: topic.start_seconds,
       lead: first?.text || "No notes in this section.",
       bullets: shown.map((segment) => ({ start: segment.start_seconds, text: segment.text })),
     };

@@ -1,17 +1,33 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class TopicIn(BaseModel):
     title: str = Field(min_length=1, max_length=200)
     start_seconds: float | None = Field(default=None, ge=0)
 
+    @field_validator("title")
+    @classmethod
+    def title_must_have_text(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("topic title cannot be blank")
+        return value
+
 
 class ActionIn(BaseModel):
     text: str = Field(min_length=1)
     is_done: bool = False
+
+    @field_validator("text")
+    @classmethod
+    def text_must_have_text(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("action item text cannot be blank")
+        return value
 
 
 class MeetingCreate(BaseModel):
@@ -42,7 +58,25 @@ class MeetingUpdate(BaseModel):
 class ActionCreate(BaseModel):
     text: str = Field(min_length=1)
 
+    @field_validator("text")
+    @classmethod
+    def text_must_have_text(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("action item text cannot be blank")
+        return value
+
 
 class ActionUpdate(BaseModel):
     text: str | None = Field(default=None, min_length=1)
     is_done: bool | None = None
+
+    @field_validator("text")
+    @classmethod
+    def text_must_have_text(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        value = value.strip()
+        if not value:
+            raise ValueError("action item text cannot be blank")
+        return value
