@@ -38,12 +38,6 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-ff-bg text-ff-text">
-      <div className="bg-ff-trial-bg py-1.5 text-center text-[12px] text-ff-trial-text">
-        You are eligible for 7 days business plan free trial.{" "}
-        <Link href="/upgrade" className="font-medium underline">
-          Start free trial
-        </Link>
-      </div>
       <div className="flex min-h-0 flex-1">
         <aside className={`relative flex shrink-0 flex-col border-r border-ff bg-ff-sidebar ${collapsed ? "w-14 items-center py-2" : "w-[232px]"}`}>
           {collapsed ? (
