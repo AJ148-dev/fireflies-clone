@@ -32,7 +32,7 @@ export function AskFred() {
   return (
     <div className="flex h-full bg-[#121214]">
       <aside className="hidden w-[220px] shrink-0 flex-col border-r border-white/5 px-3 py-4 sm:flex">
-        <button type="button" className="rounded-lg px-3 py-2 text-left text-sm hover:bg-white/5">+ New Chat</button>
+        <button type="button" onClick={() => toast("Saved chats are coming soon")} className="rounded-lg px-3 py-2 text-left text-sm hover:bg-white/5">+ New Chat</button>
         <button type="button" onClick={() => toast("Search across chats is coming soon")} className="rounded-lg px-3 py-2 text-left text-sm text-[#d4d4d8] hover:bg-white/5">Search</button>
         <button type="button" onClick={() => toast("Connectors are coming soon")} className="rounded-lg px-3 py-2 text-left text-sm text-[#d4d4d8] hover:bg-white/5">Connectors</button>
         <p className="mt-8 px-3 text-sm text-[#a1a1aa]">No chats yet</p>

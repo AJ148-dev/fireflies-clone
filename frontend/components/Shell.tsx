@@ -48,7 +48,7 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-0 flex-1">
         <aside className={`relative flex shrink-0 flex-col border-r border-white/5 bg-[#17171a] ${collapsed ? "w-14 items-center py-2" : "w-[232px]"}`}>
           {collapsed ? (
-            <IconRail pathname={pathname} onProfile={() => setProfileOpen((open) => !open)} />
+            <IconRail pathname={pathname} onProfile={() => setProfileOpen((open) => !open)} onExpand={narrow ? undefined : () => setExpanded(true)} />
           ) : (
             <WideSidebar pathname={pathname} inviteOpen={inviteOpen} onCloseInvite={() => setInviteOpen(false)} onCollapse={() => setExpanded(false)} onProfile={() => setProfileOpen((open) => !open)} toast={toast} />
           )}
@@ -97,13 +97,18 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
   );
 }
 
-function IconRail({ pathname, onProfile }: { pathname: string; onProfile: () => void }) {
+function IconRail({ pathname, onProfile, onExpand }: { pathname: string; onProfile: () => void; onExpand?: () => void }) {
   const items = [...PRIMARY, ...SECONDARY, { href: "/upgrade", label: "Upgrade", icon: "bolt" }, { href: "/settings", label: "Settings", icon: "gear" }];
   return (
     <>
       <button type="button" aria-label="Profile" onClick={onProfile} className="mb-2 grid h-7 w-7 place-items-center rounded-md bg-[#1f6f64] text-[11px] font-semibold text-white">
         A
       </button>
+      {onExpand ? (
+        <button type="button" aria-label="Expand sidebar" title="Expand sidebar" onClick={onExpand} className="mb-1 grid h-8 w-8 place-items-center rounded-lg text-[#a1a1aa] hover:bg-white/5">
+          <Icon name="panels" />
+        </button>
+      ) : null}
       {items.filter((item) => item.href).map((item) => {
         const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
         return (

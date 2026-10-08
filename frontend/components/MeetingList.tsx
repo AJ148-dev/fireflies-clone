@@ -116,7 +116,7 @@ export function MeetingList({
                 </button>
                 <button
                   type="button"
-                  className="block w-full px-3 py-2 text-left text-[#b42318] hover:bg-white/5"
+                  className="block w-full px-3 py-2 text-left text-[#f87171] hover:bg-white/5"
                   onClick={async () => {
                     setMenuId(null);
                     await api(`/meetings/${meeting.id}`, { method: "DELETE" });

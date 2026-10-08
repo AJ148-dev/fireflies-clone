@@ -183,7 +183,7 @@ export function MeetingView() {
         </div>
       </header>
       <Player src={meeting.audio_path} playerRef={playerRef} onTime={onTime} />
-      <div className="flex items-center gap-1 border-b border-white/5 px-3">
+      <div className="flex items-center gap-1 border-b border-white/5 px-3 xl:hidden">
         <button type="button" onClick={() => setPane("notes")} className={`border-b-2 px-3 py-2 text-[13px] ${pane === "notes" ? "border-[#6d4aff] font-medium" : "border-transparent text-[#a1a1aa]"}`}>
           Notes
         </button>
@@ -216,48 +216,46 @@ export function MeetingView() {
             </button>
           ))}
         </nav>
-        {pane === "notes" ? (
-          <div className="min-h-0 min-w-0 flex-1">
-            <SummaryRail
-              meeting={meeting}
-              onChange={setMeeting}
+        <div className={`${pane === "notes" ? "block" : "hidden"} min-h-0 min-w-0 flex-1 xl:block`}>
+          <SummaryRail
+            meeting={meeting}
+            onChange={setMeeting}
+            onSeek={(seconds) => playerRef.current?.seek(seconds)}
+            onError={(message) => toast(message, "err")}
+            onCopied={() => toast("Summary copied")}
+          />
+        </div>
+        <section className={`${pane === "transcript" ? "flex" : "hidden"} min-h-0 min-w-0 flex-1 flex-col xl:flex xl:w-[420px] xl:flex-none xl:border-l xl:border-white/5`}>
+          <div className="flex items-center gap-2 border-b border-white/5 px-3 py-2">
+            <span className="hidden text-[13px] font-medium xl:inline">Transcript</span>
+            <input
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setMatchCursor(0);
+              }}
+              placeholder="Find"
+              className="w-[180px] rounded-md border border-white/10 bg-[#1c1c20] px-2.5 py-1 text-[13px] outline-none focus:border-[#6d4aff]"
+            />
+            <span className="text-[11px] text-[#a1a1aa]">{query.trim() ? `${matches} found` : ""}</span>
+            <button type="button" onClick={() => step(-1)} disabled={!matches} className="text-[11px] text-[#d4d4d8] disabled:text-[#3f3f46]">
+              Prev
+            </button>
+            <button type="button" onClick={() => step(1)} disabled={!matches} className="text-[11px] text-[#d4d4d8] disabled:text-[#3f3f46]">
+              Next
+            </button>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <Transcript
+              segments={meeting.segments}
+              activeIndex={activeIndex}
+              query={query}
+              matchCursor={matchCursor}
+              followSearch={Boolean(query.trim())}
               onSeek={(seconds) => playerRef.current?.seek(seconds)}
-              onError={(message) => toast(message, "err")}
-              onCopied={() => toast("Summary copied")}
             />
           </div>
-        ) : (
-          <section className="flex min-h-0 min-w-0 flex-1 flex-col">
-            <div className="flex items-center gap-2 border-b border-white/5 px-3 py-2">
-              <input
-                value={query}
-                onChange={(event) => {
-                  setQuery(event.target.value);
-                  setMatchCursor(0);
-                }}
-                placeholder="Find"
-                className="w-[180px] rounded-md border border-white/10 bg-[#1c1c20] px-2.5 py-1 text-[13px] outline-none focus:border-[#6d4aff]"
-              />
-              <span className="text-[11px] text-[#a1a1aa]">{query.trim() ? `${matches} found` : ""}</span>
-              <button type="button" onClick={() => step(-1)} disabled={!matches} className="text-[11px] text-[#d4d4d8] disabled:text-[#3f3f46]">
-                Prev
-              </button>
-              <button type="button" onClick={() => step(1)} disabled={!matches} className="text-[11px] text-[#d4d4d8] disabled:text-[#3f3f46]">
-                Next
-              </button>
-            </div>
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              <Transcript
-                segments={meeting.segments}
-                activeIndex={activeIndex}
-                query={query}
-                matchCursor={matchCursor}
-                followSearch={Boolean(query.trim())}
-                onSeek={(seconds) => playerRef.current?.seek(seconds)}
-              />
-            </div>
-          </section>
-        )}
+        </section>
       </div>
       {editing ? (
         <EditMeetingModal
