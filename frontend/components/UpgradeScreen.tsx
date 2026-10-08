@@ -95,7 +95,7 @@ export function UpgradeScreen() {
               className={`flex items-center gap-2 rounded-full px-3 py-1 ${billing === "annual" ? "bg-ff-tab-active-bg text-ff-tab-active-text" : "text-ff-text-muted"}`}
             >
               ANNUAL
-              <span className="rounded bg-ff-badge-bg px-1.5 py-0.5 text-[9px] font-bold text-ff-badge-text">2 MONTHS FREE</span>
+              <span className="rounded bg-ff-deal-bg px-1.5 py-0.5 text-[9px] font-bold text-ff-deal-text">2 MONTHS FREE</span>
             </button>
           </div>
         </header>
@@ -161,7 +161,7 @@ export function UpgradeScreen() {
                   <span>
                     {item.text}
                     {item.badge ? (
-                      <span className="ml-1.5 rounded bg-ff-badge-bg px-1 py-0.5 align-middle text-[9px] font-bold text-ff-badge-text">{item.badge}</span>
+                      <span className="ml-1.5 rounded bg-ff-deal-bg px-1 py-0.5 align-middle text-[9px] font-bold text-ff-deal-text">{item.badge}</span>
                     ) : null}
                   </span>
                 </li>

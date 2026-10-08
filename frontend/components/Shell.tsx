@@ -206,7 +206,7 @@ function WideSidebar({
         <Link href="/upgrade" className={`flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] ${pathname.startsWith("/upgrade") ? "bg-ff-active font-medium text-ff-nav-active-text" : "text-ff-text-secondary hover-ff"}`}>
           <Icon name="bolt" />
           Upgrade
-          <span className="ml-auto rounded-md bg-ff-badge-bg px-1.5 py-0.5 text-[10px] font-semibold text-ff-badge-text">40% OFF</span>
+          <span className="ml-auto rounded-md bg-ff-deal-bg px-1.5 py-0.5 text-[10px] font-semibold text-ff-deal-text">40% OFF</span>
         </Link>
       </nav>
       <div className="mt-auto px-2 pb-3">

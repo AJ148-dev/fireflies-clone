@@ -93,7 +93,7 @@ export function MeetingsScreen() {
             >
               <ChannelMark id={item.id} active={channel === item.id} />
               {item.label}
-              {item.id === "uploads" ? <span className="ml-auto rounded bg-ff-badge-bg px-1 py-0.5 text-[9px] font-semibold text-ff-badge-text">NEW</span> : null}
+              {item.id === "uploads" ? <span className="ml-auto rounded bg-ff-deal-bg px-1 py-0.5 text-[9px] font-semibold text-ff-deal-text">NEW</span> : null}
             </button>
           ))}
         </div>

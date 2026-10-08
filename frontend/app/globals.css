@@ -32,8 +32,8 @@ html {
   --ff-plan-text: #86efac;
   --ff-plan-border: #166534;
   --ff-plan-bg: transparent;
-  --ff-badge-bg: #14532d;
-  --ff-badge-text: #86efac;
+  --ff-deal-bg: #14532d;
+  --ff-deal-text: #86efac;
   --ff-card: #18181b;
   --ff-modal: #1c1c20;
   --ff-ask-panel: #1a1a1e;
@@ -80,8 +80,8 @@ html[data-theme="light"] {
   --ff-plan-text: #15803d;
   --ff-plan-border: #16a34a;
   --ff-plan-bg: #ecfdf5;
-  --ff-badge-bg: #dcfce7;
-  --ff-badge-text: #15803d;
+  --ff-deal-bg: #dcfce7;
+  --ff-deal-text: #15803d;
   --ff-card: #ffffff;
   --ff-modal: #ffffff;
   --ff-ask-panel: #ffffff;
@@ -129,8 +129,8 @@ html[data-theme="dark"] {
   --color-ff-plan-text: var(--ff-plan-text);
   --color-ff-plan-border: var(--ff-plan-border);
   --color-ff-plan-bg: var(--ff-plan-bg);
-  --color-ff-badge-bg: var(--ff-badge-bg);
-  --color-ff-badge-text: var(--ff-badge-text);
+  --color-ff-deal-bg: var(--ff-deal-bg);
+  --color-ff-deal-text: var(--ff-deal-text);
   --color-ff-card: var(--ff-card);
   --color-ff-modal: var(--ff-modal);
   --color-ff-ask-panel: var(--ff-ask-panel);
@@ -319,10 +319,10 @@ html[data-theme="light"] button[class~="bg-[#6d4aff]"] {
   color: #ffffff !important;
 }
 html[data-theme="light"] [class~="text-[#86efac]"] {
-  color: var(--ff-badge-text) !important;
+  color: var(--ff-deal-text) !important;
 }
 html[data-theme="light"] [class~="bg-[#14532d]"] {
-  background-color: var(--ff-badge-bg) !important;
+  background-color: var(--ff-deal-bg) !important;
 }
 html[data-theme="light"] [class~="border-[#166534]"] {
   border-color: var(--ff-plan-border) !important;
