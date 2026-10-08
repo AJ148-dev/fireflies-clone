@@ -113,7 +113,7 @@ function IconRail({
   return (
     <>
       <button type="button" aria-label="Profile" onClick={onProfile} className="mb-3 grid h-7 w-7 place-items-center rounded-md bg-[#1f6f64] text-[11px] font-semibold text-white">
-        A
+        MC
       </button>
       {RAIL_MAIN.map((item) => (
         <RailButton key={item.label} item={item} pathname={pathname} toast={toast} />
@@ -175,8 +175,8 @@ function WideSidebar({
     <>
       <div className="flex items-center gap-2 px-3 py-3">
         <button type="button" aria-label="Profile" onClick={onProfile} className="flex min-w-0 items-center gap-2">
-          <span className="grid h-6 w-6 place-items-center rounded-md bg-[#1f6f64] text-[11px] font-semibold text-white">A</span>
-          <span className="truncate text-[13px] font-medium">23/CS/075</span>
+          <span className="grid h-6 w-6 place-items-center rounded-md bg-[#1f6f64] text-[10px] font-semibold text-white">MC</span>
+          <span className="truncate text-[13px] font-medium">Maya Chen</span>
           <span className="text-[10px] text-ff-text-muted">▾</span>
         </button>
       </div>
@@ -243,7 +243,7 @@ function ProfileMenu({
     <>
       <button type="button" aria-label="Close profile" className="fixed inset-0 z-20 cursor-default" onClick={onClose} />
       <div className={`absolute z-30 w-52 rounded-xl border border-ff-strong bg-ff-panel p-2 text-[13px] shadow-lg ${collapsed ? "top-2 left-12" : "top-12 left-3"}`}>
-        <p className="px-2 py-1 font-medium">23/CS/075</p>
+        <p className="px-2 py-1 font-medium">Maya Chen</p>
         <p className="px-2 pb-2 text-xs text-ff-text-muted">Profile is a placeholder. This workspace is already signed in.</p>
         <button
           type="button"
