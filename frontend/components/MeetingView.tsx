@@ -151,6 +151,9 @@ export function MeetingView() {
             </span>
           ))}
         </div>
+        <button type="button" onClick={() => setEditing(true)} className="rounded-md border border-white/10 px-2.5 py-1 text-[13px] font-medium text-white hover:bg-white/5">
+          Edit
+        </button>
         <Link href="/ask" className="rounded-md px-2 py-1 text-[13px] font-medium text-[#c4b5fd] hover:bg-white/5">
           AskFred
         </Link>
@@ -164,7 +167,7 @@ export function MeetingView() {
           {menuOpen ? (
             <div className="absolute right-0 z-20 mt-1 w-48 rounded-xl border border-white/10 bg-[#242428] py-1 text-sm shadow-lg">
               <button type="button" className="block w-full px-3 py-2 text-left hover:bg-white/5" onClick={() => { setMenuOpen(false); setEditing(true); }}>
-                Rename
+                Edit meeting
               </button>
               <button type="button" className="block w-full px-3 py-2 text-left hover:bg-white/5" onClick={() => { setMenuOpen(false); downloadNotes(); toast("Notes downloaded"); }}>
                 Download notes
