@@ -34,7 +34,7 @@ export function Transcript({
   }, [activeIndex, followSearch]);
 
   if (segments.length === 0) {
-    return <p className="px-6 py-10 text-sm text-[#6b7080]">This meeting has no transcript yet.</p>;
+    return <p className="px-6 py-10 text-sm text-ff-text-muted">This meeting has no transcript yet.</p>;
   }
 
   const starts: number[] = [];
@@ -55,16 +55,15 @@ export function Transcript({
               rowRefs.current[index] = node;
             }}
             onClick={() => onSeek(segment.start_seconds)}
-            className={`flex gap-3 px-3 py-2 text-left ${
-              active ? "bg-[#241c3d]" : "hover:bg-white/5"
-            }`}
+            className={`flex gap-3 px-3 py-2 text-left ${active ? "bg-ff-transcript-active" : "hover-ff"}`}
           >
-            <span className="w-10 shrink-0 pt-0.5 text-xs tabular-nums text-[#98a0b3]">
-              {formatClock(segment.start_seconds)}
-            </span>
-            <span className="min-w-0 border-l-2 pl-3" style={{ borderColor: active ? "#6d4aff" : "#2a2a2e" }}>
-              <span className="block text-xs font-semibold text-[#d4d4d8]">{segment.speaker_name}</span>
-              <span className="mt-0.5 block text-[13px] leading-5 text-[#e4e4e7]">
+            <span className="w-10 shrink-0 pt-0.5 text-xs tabular-nums text-ff-text-muted">{formatClock(segment.start_seconds)}</span>
+            <span
+              className="min-w-0 border-l-2 pl-3"
+              style={{ borderColor: active ? "#6d4aff" : "var(--ff-transcript-border)" }}
+            >
+              <span className="block text-xs font-semibold text-ff-text-secondary">{segment.speaker_name}</span>
+              <span className="mt-0.5 block text-[13px] leading-5 text-ff-text-secondary">
                 <Highlight
                   text={segment.text}
                   needle={needle}

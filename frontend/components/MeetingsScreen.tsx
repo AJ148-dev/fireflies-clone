@@ -69,13 +69,13 @@ export function MeetingsScreen() {
   const visibleChannels = CHANNELS.filter((item) => item.label.toLowerCase().includes(channelQuery.trim().toLowerCase()));
 
   return (
-    <div className="flex h-full min-h-0 bg-[#121214]">
-      <aside className="hidden w-[220px] shrink-0 flex-col border-r border-white/5 px-3 py-3 lg:flex">
+    <div className="flex h-full min-h-0 bg-ff-bg text-ff-text">
+      <aside className="hidden w-[220px] shrink-0 flex-col border-r border-ff bg-ff-sidebar px-3 py-3 lg:flex">
         <input
           value={channelQuery}
           onChange={(event) => setChannelQuery(event.target.value)}
           placeholder="Search channels"
-          className="rounded-lg border border-white/10 bg-[#1c1c20] px-3 py-1.5 text-[13px] outline-none placeholder:text-[#71717a]"
+          className="rounded-lg border border-ff-strong bg-ff-elevated px-3 py-1.5 text-[13px] text-ff-text outline-none placeholder:text-ff-text-faint"
         />
         <div className="mt-3 flex flex-col gap-0.5">
           {visibleChannels.map((item) => (
@@ -89,51 +89,51 @@ export function MeetingsScreen() {
                 }
                 setChannel(item.id);
               }}
-              className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] ${channel === item.id ? "bg-[#3a246b] font-medium text-[#e9d5ff]" : "text-[#d4d4d8] hover:bg-white/5"}`}
+              className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] ${channel === item.id ? "bg-ff-channel-active font-medium text-ff-channel-active-text" : "text-ff-text-secondary hover-ff"}`}
             >
               <ChannelMark id={item.id} active={channel === item.id} />
               {item.label}
-              {item.id === "uploads" ? <span className="ml-auto rounded bg-[#14532d] px-1 py-0.5 text-[9px] font-semibold text-[#86efac]">NEW</span> : null}
+              {item.id === "uploads" ? <span className="ml-auto rounded bg-ff-badge-bg px-1 py-0.5 text-[9px] font-semibold text-ff-badge-text">NEW</span> : null}
             </button>
           ))}
         </div>
-        <div className="mt-4 border-t border-white/10 pt-4">
-          <p className="px-2 text-[13px] text-[#a1a1aa]">All channels</p>
+        <div className="mt-4 border-t border-ff-strong pt-4">
+          <p className="px-2 text-[13px] text-ff-text-muted">All channels</p>
           <p className="mt-4 text-center text-lg text-[#e879f9]">#</p>
-          <p className="mt-3 px-2 text-center text-[13px] leading-5 text-[#a1a1aa]">Create channels to organize your conversations</p>
-          <button type="button" onClick={() => toast("Channels are coming soon")} className="mx-auto mt-3 block rounded-lg border border-white/10 px-4 py-1.5 text-[13px] text-[#d4d4d8]">
+          <p className="mt-3 px-2 text-center text-[13px] leading-5 text-ff-text-muted">Create channels to organize your conversations</p>
+          <button type="button" onClick={() => toast("Channels are coming soon")} className="mx-auto mt-3 block rounded-lg border border-ff-strong px-4 py-1.5 text-[13px] text-ff-text-secondary">
             + Channel
           </button>
         </div>
       </aside>
 
       <section className="flex min-w-0 flex-1 flex-col">
-        <div className="flex items-center gap-2 border-b border-white/5 px-4 py-2.5">
-          <button type="button" className="rounded-lg bg-[#2a2a2e] px-3 py-1 text-[13px]">
+        <div className="flex items-center gap-2 border-b border-ff bg-ff-bg px-4 py-2.5">
+          <button type="button" className="rounded-lg bg-ff-tab-active-bg px-3 py-1 text-[13px] text-ff-tab-active-text">
             Hosted by me
           </button>
-          <button type="button" onClick={() => toast("Shared meetings are coming soon")} className="rounded-lg px-3 py-1 text-[13px] text-[#a1a1aa]">
+          <button type="button" onClick={() => toast("Shared meetings are coming soon")} className="rounded-lg px-3 py-1 text-[13px] text-ff-text-muted">
             Shared with me
           </button>
         </div>
-        <div className="flex flex-wrap items-center gap-2 border-b border-white/5 px-4 py-2">
+        <div className="flex flex-wrap items-center gap-2 border-b border-ff bg-ff-bg px-4 py-2">
           <input
             aria-label="Search meetings"
             value={q}
             placeholder="Search by title or participant"
             onChange={(event) => update({ q: event.target.value })}
-            className="min-w-[12rem] flex-1 rounded-lg border border-white/10 bg-[#1c1c20] px-2 py-1 text-[13px] outline-none placeholder:text-[#71717a]"
+            className="min-w-[12rem] flex-1 rounded-lg border border-ff-strong bg-ff-elevated px-2 py-1 text-[13px] text-ff-text outline-none placeholder:text-ff-text-faint"
           />
-          <input type="date" value={from} aria-label="From date" suppressHydrationWarning onChange={(event) => update({ from: event.target.value })} className="rounded-lg border border-white/10 bg-[#1c1c20] px-2 py-1 text-[13px]" />
-          <input type="date" value={to} aria-label="To date" suppressHydrationWarning onChange={(event) => update({ to: event.target.value })} className="rounded-lg border border-white/10 bg-[#1c1c20] px-2 py-1 text-[13px]" />
-          <select value={sort} aria-label="Sort" onChange={(event) => update({ sort: event.target.value })} className="rounded-lg border border-white/10 bg-[#1c1c20] px-2 py-1 text-[13px]">
+          <input type="date" value={from} aria-label="From date" suppressHydrationWarning onChange={(event) => update({ from: event.target.value })} className="rounded-lg border border-ff-strong bg-ff-elevated px-2 py-1 text-[13px] text-ff-text" />
+          <input type="date" value={to} aria-label="To date" suppressHydrationWarning onChange={(event) => update({ to: event.target.value })} className="rounded-lg border border-ff-strong bg-ff-elevated px-2 py-1 text-[13px] text-ff-text" />
+          <select value={sort} aria-label="Sort" onChange={(event) => update({ sort: event.target.value })} className="rounded-lg border border-ff-strong bg-ff-elevated px-2 py-1 text-[13px] text-ff-text">
             <option value="recent">Newest</option>
             <option value="oldest">Oldest</option>
           </select>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto">
           {loading ? (
-            <p className="px-6 py-8 text-sm text-[#a1a1aa]">Loading meetings…</p>
+            <p className="px-6 py-8 text-sm text-ff-text-muted">Loading meetings…</p>
           ) : (
             <MeetingList
               meetings={meetings}
@@ -145,33 +145,33 @@ export function MeetingsScreen() {
         </div>
       </section>
 
-      <aside className="hidden w-[300px] shrink-0 flex-col border-l border-white/5 lg:flex">
-        <div className="flex items-center gap-2 border-b border-white/5 px-3 py-2.5 text-[13px] font-medium">
-          <span className="text-[#c4b5fd]">✦</span> Ask Fred
+      <aside className="hidden w-[300px] shrink-0 flex-col border-l border-ff bg-ff-sidebar lg:flex">
+        <div className="flex items-center gap-2 border-b border-ff px-3 py-2.5 text-[13px] font-medium">
+          <span className="text-ff-link">✦</span> Ask Fred
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-3">
-          <div className="rounded-xl bg-[#2a1d55] p-3">
+          <div className="rounded-xl bg-ff-ask-card p-3 text-ff-text">
             <p className="text-[13px] leading-5">Connect Slack and Gmail — get answers with full context.</p>
-            <button type="button" onClick={() => toast("Connectors are coming soon")} className="mt-2 text-[13px] font-medium text-[#c4b5fd]">
+            <button type="button" onClick={() => toast("Connectors are coming soon")} className="mt-2 text-[13px] font-medium text-ff-link">
               Connect
             </button>
           </div>
           <p className="mt-5 text-sm font-semibold">Hi {firstName}!</p>
           <p className="text-sm font-semibold">Get ready for your meeting</p>
           <div className="mt-4 flex flex-col gap-2">
-            <button type="button" onClick={() => router.push("/tasks")} className="rounded-lg border border-white/10 px-3 py-2 text-left text-[13px]">
+            <button type="button" onClick={() => router.push("/tasks")} className="rounded-lg border border-ff-strong px-3 py-2 text-left text-[13px] text-ff-text">
               My action items
             </button>
-            <button type="button" onClick={() => toast("Key decisions live on each meeting summary")} className="rounded-lg border border-white/10 px-3 py-2 text-left text-[13px] text-[#d4d4d8]">
+            <button type="button" onClick={() => toast("Key decisions live on each meeting summary")} className="rounded-lg border border-ff-strong px-3 py-2 text-left text-[13px] text-ff-text-secondary">
               Key decisions
             </button>
-            <button type="button" onClick={() => toast("Key initiatives live on each meeting summary")} className="rounded-lg border border-white/10 px-3 py-2 text-left text-[13px] text-[#d4d4d8]">
+            <button type="button" onClick={() => toast("Key initiatives live on each meeting summary")} className="rounded-lg border border-ff-strong px-3 py-2 text-left text-[13px] text-ff-text-secondary">
               Key initiatives
             </button>
           </div>
         </div>
         <form
-          className="m-3 rounded-xl border border-white/10 p-2"
+          className="m-3 rounded-xl border border-ff-strong bg-ff-elevated p-2"
           onSubmit={(event) => {
             event.preventDefault();
             if (!ask.trim()) return;
@@ -179,15 +179,15 @@ export function MeetingsScreen() {
             toast("Ask Fred answers from a meeting summary in this build");
           }}
         >
-          <p className="px-1 text-[11px] text-[#a78bfa]"># My Meetings</p>
+          <p className="px-1 text-[11px] text-ff-link"># My Meetings</p>
           <input
             value={ask}
             onChange={(event) => setAsk(event.target.value)}
             placeholder="Ask anything. Type / to run AI skills."
-            className="w-full bg-transparent px-1 py-1.5 text-[13px] outline-none placeholder:text-[#71717a]"
+            className="w-full bg-transparent px-1 py-1.5 text-[13px] text-ff-text outline-none placeholder:text-ff-text-faint"
           />
           <div className="flex justify-end">
-            <button type="submit" className="grid h-7 w-7 place-items-center rounded-md bg-[#6d4aff] text-sm">↑</button>
+            <button type="submit" className="grid h-7 w-7 place-items-center rounded-md bg-[#6d4aff] text-sm text-on-accent">↑</button>
           </div>
         </form>
       </aside>

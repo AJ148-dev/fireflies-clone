@@ -48,30 +48,30 @@ export function HomeDashboard() {
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-[#121214] px-6 py-6">
-      <section className="mx-auto flex max-w-3xl items-center justify-between gap-8 rounded-2xl bg-gradient-to-r from-[#3a2618] via-[#5a3a22] to-[#2a2118] px-8 py-8">
+    <div className="h-full overflow-y-auto bg-ff-bg px-6 py-6 text-ff-text">
+      <section className="home-hero mx-auto flex max-w-3xl items-center justify-between gap-8 rounded-2xl px-8 py-8">
         <div>
           <h1 className="text-2xl font-semibold">Welcome Aboard, {name}!</h1>
-          <p className="mt-2 max-w-md text-sm leading-6 text-[#e7d7c8]">
+          <p className="home-hero-sub mt-2 max-w-md text-sm leading-6">
             Fireflies is now ready to automate your meetings and streamline your workflows.
           </p>
         </div>
-        <div className="hidden h-36 w-56 shrink-0 items-center justify-center rounded-xl border border-[#c4a574]/40 bg-gradient-to-br from-[#2a1b55] to-[#120c28] sm:flex">
-          <span className="grid h-10 w-10 place-items-center rounded-full bg-white/90 text-[#2a1b55]">▶</span>
+        <div className="home-hero-video hidden h-36 w-56 shrink-0 items-center justify-center rounded-xl border sm:flex">
+          <span className="home-hero-play grid h-10 w-10 place-items-center rounded-full">▶</span>
         </div>
       </section>
 
       <section className="mx-auto mt-8 max-w-3xl">
         <h2 className="text-base font-semibold">Quick Start</h2>
-        <p className="mt-1 text-sm text-[#a1a1aa]">Capture your first meeting or upload a recording to see Fireflies in action.</p>
+        <p className="mt-1 text-sm text-ff-text-muted">Capture your first meeting or upload a recording to see Fireflies in action.</p>
         <div className="mt-4 grid gap-3 lg:grid-cols-3">
-          <button type="button" onClick={() => toast("Scheduling a live meeting is coming soon")} className="flex items-center justify-between rounded-xl bg-[#3a2a55] px-4 py-4 text-sm font-medium">
+          <button type="button" onClick={() => toast("Scheduling a live meeting is coming soon")} className="qs-schedule flex items-center justify-between rounded-xl px-4 py-4 text-sm font-medium">
             Schedule Meeting <span>›</span>
           </button>
-          <button type="button" onClick={() => setCreating(true)} className="flex items-center justify-between rounded-xl bg-[#0f5c4c] px-4 py-4 text-sm font-medium">
+          <button type="button" onClick={() => setCreating(true)} className="qs-upload flex items-center justify-between rounded-xl px-4 py-4 text-sm font-medium">
             Upload File <span>›</span>
           </button>
-          <button type="button" onClick={() => toast("Live capture is coming soon")} className="flex items-center justify-between rounded-xl border border-white/10 bg-[#1c1c20] px-4 py-4 text-sm font-medium">
+          <button type="button" onClick={() => toast("Live capture is coming soon")} className="qs-capture flex items-center justify-between rounded-xl px-4 py-4 text-sm font-medium">
             Capture Meeting <span>›</span>
           </button>
         </div>
@@ -84,7 +84,9 @@ export function HomeDashboard() {
               key={item}
               type="button"
               onClick={() => setTab(item)}
-              className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${tab === item ? "bg-[#2a2a2e] text-white" : "text-[#a1a1aa]"}`}
+              className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${
+                tab === item ? "bg-ff-tab-active-bg text-ff-tab-active-text" : "text-ff-text-muted"
+              }`}
             >
               {item === "feed" ? "AI Feed" : item}
             </button>
@@ -93,18 +95,18 @@ export function HomeDashboard() {
         <div className="mt-4">
           {tab === "recent" ? (
             loading ? (
-              <p className="text-sm text-[#a1a1aa]">Loading meetings…</p>
+              <p className="text-sm text-ff-text-muted">Loading meetings…</p>
             ) : (
               <MeetingList meetings={meetings} filtered={Boolean(q)} onClear={() => router.replace("/")} onChanged={() => setReloadKey((key) => key + 1)} />
             )
           ) : (
-            <p className="py-8 text-sm text-[#a1a1aa]">
+            <p className="py-8 text-sm text-ff-text-muted">
               {tab === "upcoming" ? "No upcoming meetings. A live bot is out of scope for this build." : "AI Feed is coming soon."}
             </p>
           )}
         </div>
         <h2 className="mt-10 text-base font-semibold">Try More</h2>
-        <p className="mt-2 text-sm text-[#a1a1aa]">AskFred, analytics, and voice agents are placeholders in this workspace.</p>
+        <p className="mt-2 text-sm text-ff-text-muted">AskFred, analytics, and voice agents are placeholders in this workspace.</p>
       </section>
 
       {creating ? (

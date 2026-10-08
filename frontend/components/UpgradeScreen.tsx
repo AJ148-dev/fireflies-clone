@@ -74,28 +74,28 @@ export function UpgradeScreen() {
   const cadence = billing === "annual" ? "Per seat/month billed annually" : "Per seat/month billed monthly";
 
   return (
-    <div className="h-full overflow-y-auto bg-[#121214] px-6 py-8">
+    <div className="h-full overflow-y-auto bg-ff-bg px-6 py-8 text-ff-text">
       <div className="mx-auto max-w-6xl">
         <header className="text-center">
           <h1 className="text-lg font-semibold">
-            You are on the <span className="text-white">Free</span> plan
+            You are on the <span className="font-semibold">Free</span> plan
           </h1>
-          <p className="mt-1 text-sm text-[#a1a1aa]">You need to upgrade your plan to perform this action.</p>
-          <div className="mt-4 inline-flex items-center rounded-full bg-[#1c1c20] p-1 text-[11px] font-semibold tracking-wide">
+          <p className="mt-1 text-sm text-ff-text-muted">You need to upgrade your plan to perform this action.</p>
+          <div className="mt-4 inline-flex items-center rounded-full bg-ff-elevated p-1 text-[11px] font-semibold tracking-wide shadow-sm">
             <button
               type="button"
               onClick={() => setBilling("monthly")}
-              className={`rounded-full px-3 py-1 ${billing === "monthly" ? "bg-[#2a2a2e] text-white" : "text-[#a1a1aa]"}`}
+              className={`rounded-full px-3 py-1 ${billing === "monthly" ? "bg-ff-tab-active-bg text-ff-tab-active-text" : "text-ff-text-muted"}`}
             >
               MONTHLY
             </button>
             <button
               type="button"
               onClick={() => setBilling("annual")}
-              className={`flex items-center gap-2 rounded-full px-3 py-1 ${billing === "annual" ? "bg-[#2a2a2e] text-white" : "text-[#a1a1aa]"}`}
+              className={`flex items-center gap-2 rounded-full px-3 py-1 ${billing === "annual" ? "bg-ff-tab-active-bg text-ff-tab-active-text" : "text-ff-text-muted"}`}
             >
               ANNUAL
-              <span className="rounded bg-[#14532d] px-1.5 py-0.5 text-[9px] font-bold text-[#86efac]">2 MONTHS FREE</span>
+              <span className="rounded bg-ff-badge-bg px-1.5 py-0.5 text-[9px] font-bold text-ff-badge-text">2 MONTHS FREE</span>
             </button>
           </div>
         </header>
@@ -110,7 +110,7 @@ export function UpgradeScreen() {
             onInfo={() => toast("Storage and transcription limits apply on the Free plan.")}
           >
             <CheckList items={FREE_LIMITS} />
-            <p className="mt-4 mb-2 text-xs text-[#a1a1aa]">Features</p>
+            <p className="mt-4 mb-2 text-xs text-ff-text-muted">Features</p>
             <CheckList
               items={FREE_FEATURES}
               onItem={(item) => {
@@ -121,7 +121,7 @@ export function UpgradeScreen() {
               <span className="invisible text-[10px] font-semibold tracking-wider" aria-hidden="true">
                 RATE LIMITS
               </span>
-              <button type="button" disabled className="w-full rounded-lg bg-[#2a2a2e] py-2 text-sm text-[#71717a]">
+              <button type="button" disabled className="w-full rounded-lg bg-ff-chip py-2 text-sm text-ff-text-faint">
                 Current
               </button>
             </PlanFooter>
@@ -129,7 +129,7 @@ export function UpgradeScreen() {
 
           <PlanCard name="Pro" blurb="Best suited for individuals and small teams" price={`$${prices.pro}`} priceNote={cadence}>
             <CheckList items={PRO_LIMITS} />
-            <p className="mt-4 mb-2 text-xs text-[#a1a1aa]">Everything in Free, plus</p>
+            <p className="mt-4 mb-2 text-xs text-ff-text-muted">Everything in Free, plus</p>
             <CheckList items={PRO_FEATURES} />
             <PlanFooter>
               <RateLimits onClick={() => toast("Rate limits apply per seat on the Pro plan.")} />
@@ -144,7 +144,7 @@ export function UpgradeScreen() {
             price={`$${prices.business}`}
             priceNote={cadence}
           >
-            <p className="mb-2 text-xs text-[#a1a1aa]">Everything in Pro, plus</p>
+            <p className="mb-2 text-xs text-ff-text-muted">Everything in Pro, plus</p>
             <CheckList items={BUSINESS_FEATURES} />
             <PlanFooter>
               <RateLimits onClick={() => toast("Rate limits apply per seat on the Business plan.")} />
@@ -153,15 +153,15 @@ export function UpgradeScreen() {
           </PlanCard>
 
           <PlanCard name="Enterprise" blurb="For enhanced security, control & support" price={`$${prices.enterprise}`} priceNote={cadence}>
-            <p className="mb-2 text-xs text-[#a1a1aa]">Everything in Business, plus</p>
+            <p className="mb-2 text-xs text-ff-text-muted">Everything in Business, plus</p>
             <ul className="flex flex-col gap-1.5">
               {ENTERPRISE_FEATURES.map((item) => (
-                <li key={item.text} className="flex items-start gap-2 text-[13px] text-[#d4d4d8]">
+                <li key={item.text} className="flex items-start gap-2 text-[13px] text-ff-text-secondary">
                   <Check />
                   <span>
                     {item.text}
                     {item.badge ? (
-                      <span className="ml-1.5 rounded bg-[#14532d] px-1 py-0.5 align-middle text-[9px] font-bold text-[#86efac]">{item.badge}</span>
+                      <span className="ml-1.5 rounded bg-ff-badge-bg px-1 py-0.5 align-middle text-[9px] font-bold text-ff-badge-text">{item.badge}</span>
                     ) : null}
                   </span>
                 </li>
@@ -198,19 +198,19 @@ function PlanCard({
   children: ReactNode;
 }) {
   return (
-    <section className="flex h-full flex-col rounded-xl border border-white/10 bg-[#18181b] p-4">
+    <section className="flex h-full flex-col rounded-xl border border-ff-strong bg-ff-card p-4 shadow-sm">
       <div className="flex items-center gap-1.5">
         <h2 className="text-sm font-semibold">{name}</h2>
         {info ? (
-          <button type="button" aria-label={info} title={info} onClick={onInfo} className="grid h-4 w-4 place-items-center rounded-full border border-white/20 text-[10px] text-[#a1a1aa]">
+          <button type="button" aria-label={info} title={info} onClick={onInfo} className="grid h-4 w-4 place-items-center rounded-full border border-ff-strong text-[10px] text-ff-text-muted">
             i
           </button>
         ) : null}
-        {badge ? <span className="rounded bg-[#312e81] px-1.5 py-0.5 text-[9px] font-bold tracking-wide text-[#c4b5fd]">{badge}</span> : null}
+        {badge ? <span className="rounded bg-ff-badge-bg px-1.5 py-0.5 text-[9px] font-bold tracking-wide text-ff-badge-text">{badge}</span> : null}
       </div>
-      <p className="mt-1 min-h-8 text-xs leading-4 text-[#a1a1aa]">{blurb}</p>
+      <p className="mt-1 min-h-8 text-xs leading-4 text-ff-text-muted">{blurb}</p>
       <p className="mt-3 text-2xl font-semibold">{price}</p>
-      <p className="mt-0.5 mb-4 text-[11px] text-[#71717a]">{priceNote}</p>
+      <p className="mt-0.5 mb-4 text-[11px] text-ff-text-faint">{priceNote}</p>
       <div className="flex flex-1 flex-col">{children}</div>
     </section>
   );
@@ -220,10 +220,10 @@ function CheckList({ items, onItem }: { items: string[]; onItem?: (item: string)
   return (
     <ul className="flex flex-col gap-1.5">
       {items.map((item) => (
-        <li key={item} className="flex items-start gap-2 text-[13px] text-[#d4d4d8]">
+        <li key={item} className="flex items-start gap-2 text-[13px] text-ff-text-secondary">
           <Check />
           {onItem && item.startsWith("Desktop app") ? (
-            <button type="button" onClick={() => onItem(item)} className="text-left hover:text-white">
+            <button type="button" onClick={() => onItem(item)} className="text-left hover-ff-text">
               {item}
             </button>
           ) : (
@@ -237,7 +237,7 @@ function CheckList({ items, onItem }: { items: string[]; onItem?: (item: string)
 
 function Check() {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" className="mt-0.5 shrink-0 text-[#a1a1aa]" aria-hidden="true">
+    <svg width="14" height="14" viewBox="0 0 14 14" className="mt-0.5 shrink-0 text-ff-text-muted" aria-hidden="true">
       <path d="M2.5 7.2 5.4 10 11.5 3.8" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -249,7 +249,7 @@ function PlanFooter({ children }: { children: ReactNode }) {
 
 function RateLimits({ onClick }: { onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="text-[10px] font-semibold tracking-wider text-[#71717a] hover:text-[#a1a1aa]">
+    <button type="button" onClick={onClick} className="text-[10px] font-semibold tracking-wider text-ff-text-faint hover:text-ff-text-muted">
       RATE LIMITS
     </button>
   );
@@ -257,7 +257,7 @@ function RateLimits({ onClick }: { onClick: () => void }) {
 
 function UpgradeButton({ onClick }: { onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="w-full rounded-lg bg-[#6d4aff] py-2 text-sm font-medium text-white hover:bg-[#7c5cff]">
+    <button type="button" onClick={onClick} className="w-full rounded-lg bg-[#6d4aff] py-2 text-sm font-medium text-on-accent hover:bg-[#7c5cff]">
       Upgrade
     </button>
   );

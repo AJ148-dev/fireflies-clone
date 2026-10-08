@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { ToastProvider, useToast } from "@/components/Toast";
 
 const PRIMARY = [
@@ -33,18 +34,19 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
   const [inviteOpen, setInviteOpen] = useState(true);
   const [profileOpen, setProfileOpen] = useState(false);
   const collapsed = pathname.startsWith("/meetings") || pathname.startsWith("/upgrade") || pathname.startsWith("/ask");
+  const meetingDetailScroll = /^\/meetings\/[^/]+$/.test(pathname);
   const pageLabel = pathname === "/ask" ? "AskFred" : pathname.startsWith("/meetings") ? "Meetings" : pathname.startsWith("/tasks") ? "Tasks" : pathname.startsWith("/analytics") ? "Analytics" : pathname.startsWith("/upgrade") ? "Plan" : pathname === "/settings" ? "Settings" : "Home";
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#121214] text-[#f4f4f5]">
-      <div className="bg-[#3a246b] py-1.5 text-center text-[12px] text-[#f3e8ff]">
+    <div className="flex h-screen flex-col overflow-hidden bg-ff-bg text-ff-text">
+      <div className="bg-ff-trial-bg py-1.5 text-center text-[12px] text-ff-trial-text">
         You are eligible for 7 days business plan free trial.{" "}
         <Link href="/upgrade" className="font-medium underline">
           Start free trial
         </Link>
       </div>
       <div className="flex min-h-0 flex-1">
-        <aside className={`relative flex shrink-0 flex-col border-r border-white/5 bg-[#17171a] ${collapsed ? "w-14 items-center py-2" : "w-[232px]"}`}>
+        <aside className={`relative flex shrink-0 flex-col border-r border-ff bg-ff-sidebar ${collapsed ? "w-14 items-center py-2" : "w-[232px]"}`}>
           {collapsed ? (
             <IconRail pathname={pathname} toast={toast} onProfile={() => setProfileOpen((open) => !open)} />
           ) : (
@@ -55,37 +57,38 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
           ) : null}
         </aside>
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
-          <header className="flex items-center gap-3 border-b border-white/5 px-4 py-2">
-            <span className="shrink-0 text-[13px] text-[#d4d4d8]">{pageLabel}</span>
-            <Suspense fallback={<div className="h-8 w-full max-w-md rounded-lg bg-[#1c1c20]" />}>
+          <header className="flex items-center gap-3 border-b border-ff bg-ff-bg px-4 py-2">
+            <span className="shrink-0 text-[13px] text-ff-text-secondary">{pageLabel}</span>
+            <Suspense fallback={<div className="h-8 w-full max-w-md rounded-lg bg-ff-elevated" />}>
               <GlobalSearch />
             </Suspense>
             <div className="ml-auto flex items-center gap-2">
               {!collapsed ? (
                 <>
-                  <span className="hidden items-center gap-1.5 text-xs text-[#86efac] lg:flex">
+                  <span className="hidden items-center gap-1.5 text-xs text-ff-plan-text lg:flex">
                     <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e]" />3 Free meetings
                   </span>
-                  <Link href="/upgrade" className="rounded-md border border-[#166534] px-2 py-1 text-xs text-[#86efac]">
+                  <Link href="/upgrade" className="rounded-md border border-ff-plan bg-ff-plan-bg px-2 py-1 text-xs font-medium text-ff-plan-text hover:bg-[#dcfce7]">
                     Upgrade
                   </Link>
                 </>
               ) : null}
-              <button type="button" aria-label="Notifications" onClick={() => toast("No new notifications")} className="text-[#a1a1aa]">
+              <ThemeToggle />
+              <button type="button" aria-label="Notifications" onClick={() => toast("No new notifications")} className="text-ff-text-secondary hover:text-ff-text">
                 <Icon name="bell" />
               </button>
-              <Link href="/?upload=1" aria-label="Capture" className="flex items-center gap-1.5 rounded-lg bg-[#6d4aff] px-3 py-1.5 text-sm font-medium">
+              <Link href="/?upload=1" aria-label="Capture" className="flex items-center gap-1.5 rounded-lg bg-[#6d4aff] px-3 py-1.5 text-sm font-medium text-on-accent">
                 {!collapsed ? "Capture" : "+"}
                 {!collapsed ? <span className="text-[10px] opacity-80">▾</span> : null}
               </Link>
             </div>
           </header>
-          <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
+          <div className={`min-h-0 flex-1 bg-ff-bg ${meetingDetailScroll ? "overflow-y-auto" : "overflow-hidden"}`}>{children}</div>
           <button
             type="button"
             aria-label="Help"
             onClick={() => toast("Help is coming soon")}
-            className="absolute right-5 bottom-5 grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-[#2a2a2e] text-sm text-[#d4d4d8]"
+            className="absolute right-5 bottom-5 grid h-10 w-10 place-items-center rounded-full border border-ff-strong bg-ff-chip text-sm text-ff-text-secondary"
           >
             ?
           </button>
@@ -148,7 +151,7 @@ function RailButton({
   toast: (message: string) => void;
 }) {
   const active = item.href !== "" && (item.href === "/" ? pathname === "/" : pathname.startsWith(item.href));
-  const className = `grid h-9 w-9 place-items-center rounded-lg ${active ? "bg-[#2a2a2e] text-white" : "text-[#d4d4d8] hover:bg-white/5"}`;
+  const className = `grid h-9 w-9 place-items-center rounded-lg ${active ? "bg-ff-active text-ff-nav-active-text" : "text-ff-text-secondary hover-ff"}`;
   const glyph = (
     <span className={`relative ${item.icon === "ask" ? "text-[#a78bfa]" : ""}`}>
       <Icon name={item.icon} />
@@ -188,45 +191,45 @@ function WideSidebar({
         <button type="button" aria-label="Profile" onClick={onProfile} className="flex min-w-0 items-center gap-2">
           <span className="grid h-6 w-6 place-items-center rounded-md bg-[#1f6f64] text-[11px] font-semibold text-white">A</span>
           <span className="truncate text-[13px] font-medium">23/CS/075</span>
-          <span className="text-[10px] text-[#a1a1aa]">▾</span>
+          <span className="text-[10px] text-ff-text-muted">▾</span>
         </button>
       </div>
       <nav className="flex flex-col px-2">
         {PRIMARY.map((item) => (
           <NavRow key={item.label} item={item} pathname={pathname} toast={toast} />
         ))}
-        <div className="mx-2 my-2 border-t border-white/10" />
+        <div className="mx-2 my-2 border-t border-ff-strong" />
         {SECONDARY.map((item) => (
           <NavRow key={item.label} item={item} pathname={pathname} toast={toast} />
         ))}
-        <div className="mx-2 my-2 border-t border-white/10" />
-        <Link href="/upgrade" className={`flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] ${pathname.startsWith("/upgrade") ? "bg-[#2c2c31] font-medium" : "text-[#d4d4d8] hover:bg-white/5"}`}>
+        <div className="mx-2 my-2 border-t border-ff-strong" />
+        <Link href="/upgrade" className={`flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] ${pathname.startsWith("/upgrade") ? "bg-ff-active font-medium text-ff-nav-active-text" : "text-ff-text-secondary hover-ff"}`}>
           <Icon name="bolt" />
           Upgrade
-          <span className="ml-auto rounded-md bg-[#14532d] px-1.5 py-0.5 text-[10px] font-semibold text-[#86efac]">40% OFF</span>
+          <span className="ml-auto rounded-md bg-ff-badge-bg px-1.5 py-0.5 text-[10px] font-semibold text-ff-badge-text">40% OFF</span>
         </Link>
       </nav>
       <div className="mt-auto px-2 pb-3">
-        <button type="button" onClick={() => toast("Email assistant is coming soon")} className="flex w-full items-center gap-2 rounded-lg bg-[#241b45] px-2.5 py-2 text-left text-[13px] font-medium">
+        <button type="button" onClick={() => toast("Email assistant is coming soon")} className="flex w-full items-center gap-2 rounded-lg bg-ff-promo-bg px-2.5 py-2 text-left text-[13px] font-medium text-ff-text">
           <GmailMark />
           Try Email Assistant
         </button>
-        <button type="button" onClick={() => toast("Integrations are coming soon")} className="mt-1 flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-[13px] text-[#d4d4d8] hover:bg-white/5">
+        <button type="button" onClick={() => toast("Integrations are coming soon")} className="mt-1 flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-[13px] text-ff-text-secondary hover-ff">
           <Icon name="puzzle" />
           Integrations
         </button>
-        <Link href="/settings" className={`flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] ${pathname === "/settings" ? "bg-[#2c2c31] font-medium" : "text-[#d4d4d8] hover:bg-white/5"}`}>
+        <Link href="/settings" className={`flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] ${pathname === "/settings" ? "bg-ff-active font-medium text-ff-nav-active-text" : "text-ff-text-secondary hover-ff"}`}>
           <Icon name="gear" />
           Settings
         </Link>
         <div className="px-1 pt-3">
         {inviteOpen ? (
-          <div className="relative rounded-xl border border-white/10 bg-[#121214] p-3">
-            <button type="button" aria-label="Dismiss invite" onClick={onCloseInvite} className="absolute top-2 right-2 text-xs text-[#71717a]">
+          <div className="relative rounded-xl border border-ff-strong bg-ff-invite-card p-3">
+            <button type="button" aria-label="Dismiss invite" onClick={onCloseInvite} className="absolute top-2 right-2 text-xs text-ff-text-faint">
               ×
             </button>
-            <p className="pr-4 text-[13px] leading-5 text-[#e4e4e7]">Invite coworkers to your Fireflies team</p>
-            <button type="button" onClick={() => toast("Teams are coming soon")} className="mt-3 w-full rounded-lg bg-[#6d4aff] py-2 text-sm font-medium">
+            <p className="pr-4 text-[13px] leading-5 text-ff-text-secondary">Invite coworkers to your Fireflies team</p>
+            <button type="button" onClick={() => toast("Teams are coming soon")} className="mt-3 w-full rounded-lg bg-[#6d4aff] py-2 text-sm font-medium text-on-accent">
               Create Team
             </button>
           </div>
@@ -253,12 +256,12 @@ function ProfileMenu({
   return (
     <>
       <button type="button" aria-label="Close profile" className="fixed inset-0 z-20 cursor-default" onClick={onClose} />
-      <div className={`absolute z-30 w-52 rounded-xl border border-white/10 bg-[#242428] p-2 text-[13px] shadow-lg ${collapsed ? "top-2 left-12" : "top-12 left-3"}`}>
+      <div className={`absolute z-30 w-52 rounded-xl border border-ff-strong bg-ff-panel p-2 text-[13px] shadow-lg ${collapsed ? "top-2 left-12" : "top-12 left-3"}`}>
         <p className="px-2 py-1 font-medium">23/CS/075</p>
-        <p className="px-2 pb-2 text-xs text-[#a1a1aa]">Profile is a placeholder. This workspace is already signed in.</p>
+        <p className="px-2 pb-2 text-xs text-ff-text-muted">Profile is a placeholder. This workspace is already signed in.</p>
         <button
           type="button"
-          className="block w-full rounded-lg px-2 py-1.5 text-left hover:bg-white/5"
+          className="block w-full rounded-lg px-2 py-1.5 text-left hover-ff"
           onClick={() => {
             onClose();
             toast("Account settings are coming soon");
@@ -266,7 +269,7 @@ function ProfileMenu({
         >
           Account
         </button>
-        <Link href="/settings" onClick={onClose} className="block rounded-lg px-2 py-1.5 hover:bg-white/5">
+        <Link href="/settings" onClick={onClose} className="block rounded-lg px-2 py-1.5 hover-ff">
           Settings
         </Link>
       </div>
@@ -284,7 +287,7 @@ function NavRow({
   toast: (message: string) => void;
 }) {
   const active = item.href !== "" && (item.href === "/" ? pathname === "/" : pathname.startsWith(item.href));
-  const className = `flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] ${active ? "bg-[#2c2c31] font-medium text-white" : "text-[#d4d4d8] hover:bg-white/5"}`;
+  const className = `flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] ${active ? "bg-ff-active font-medium text-ff-nav-active-text" : "text-ff-text-secondary hover-ff"}`;
   const icon = <span className={item.icon === "ask" ? "text-[#a78bfa]" : ""}><Icon name={item.icon} /></span>;
   if (!item.href) {
     return (
@@ -334,9 +337,9 @@ function GlobalSearch() {
         router.replace(query ? `${base}?${query}` : base);
       }}
       placeholder="Search by title or keyword"
-      className="w-full rounded-lg border border-white/10 bg-[#1c1c20] py-1.5 pr-12 pl-3 text-[13px] outline-none placeholder:text-[#71717a] focus:border-[#6d4aff]"
+      className="w-full rounded-lg border border-ff-strong bg-ff-elevated py-1.5 pr-12 pl-3 text-[13px] text-ff-text outline-none placeholder:text-ff-text-faint focus:border-[#6d4aff]"
     />
-      <span className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded border border-white/10 px-1 text-[10px] text-[#71717a]">⌘K</span>
+      <span className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded border border-ff-strong px-1 text-[10px] text-ff-text-faint">⌘K</span>
     </div>
   );
 }

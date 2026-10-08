@@ -39,7 +39,6 @@ export function MeetingView() {
   const [deleting, setDeleting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [pane, setPane] = useState<"notes" | "transcript">("notes");
-  const [source, setSource] = useState<"audio" | "video">("audio");
   const onTime = useCallback((seconds: number) => setTime(seconds), []);
 
   useEffect(() => {
@@ -52,10 +51,10 @@ export function MeetingView() {
   }, [params.id]);
 
   if (missing) {
-    return <p className="p-8 text-sm text-[#6b7080]">This meeting is gone.</p>;
+    return <p className="p-8 text-sm text-ff-text-muted">This meeting is gone.</p>;
   }
   if (!meeting) {
-    return <p className="p-8 text-sm text-[#6b7080]">Loading meeting…</p>;
+    return <p className="p-8 text-sm text-ff-text-muted">Loading meeting…</p>;
   }
 
   const matches = countMatches(meeting.segments, query);
@@ -114,14 +113,14 @@ export function MeetingView() {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[#121214]">
-      <header className="flex items-center gap-3 border-b border-white/5 px-3 py-2">
-        <Link href="/meetings" className="rounded-md px-2 py-1 text-[13px] text-[#a1a1aa] hover:bg-white/5">
+    <div className="flex flex-col bg-ff-bg text-ff-text">
+      <header className="flex shrink-0 items-center gap-3 border-b border-ff bg-ff-bg px-3 py-2">
+        <Link href="/meetings" className="rounded-md px-2 py-1 text-[13px] text-ff-text-muted hover-ff">
           Meetings
         </Link>
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-sm font-semibold">{meeting.title}</h1>
-          <p className="truncate text-[11px] text-[#a1a1aa]">
+          <p className="truncate text-[11px] text-ff-text-muted">
             {formatDate(meeting.started_at)} · {formatTimeOfDay(meeting.started_at)} · {formatDuration(meeting.duration_seconds)}
             {meeting.participants.length > 0 ? ` · ${meeting.participants.map((person) => person.name).join(", ")}` : ""}
           </p>
@@ -138,66 +137,51 @@ export function MeetingView() {
             </span>
           ))}
         </div>
-        <button type="button" onClick={() => setEditing(true)} className="rounded-md border border-white/10 px-2.5 py-1 text-[13px] font-medium text-white hover:bg-white/5">
+        <button type="button" onClick={() => setEditing(true)} className="rounded-md border border-ff-strong px-2.5 py-1 text-[13px] font-medium text-ff-text hover-ff">
           Edit
         </button>
-        <Link href="/ask" className="rounded-md px-2 py-1 text-[13px] font-medium text-[#c4b5fd] hover:bg-white/5">
+        <Link href="/ask" className="rounded-md px-2 py-1 text-[13px] font-medium text-ff-link hover-ff">
           AskFred
         </Link>
-        <button type="button" onClick={() => toast("Sharing is coming soon")} className="rounded-md bg-[#6d4aff] px-2.5 py-1 text-[13px] font-medium text-white">
+        <button type="button" onClick={() => toast("Sharing is coming soon")} className="rounded-md bg-[#6d4aff] px-2.5 py-1 text-[13px] font-medium text-on-accent">
           Share
         </button>
         <div className="relative">
-          <button type="button" onClick={() => setMenuOpen((open) => !open)} className="rounded-lg px-2 py-1.5 text-sm text-[#d4d4d8] hover:bg-white/5" aria-label="Meeting menu">
+          <button type="button" onClick={() => setMenuOpen((open) => !open)} className="rounded-lg px-2 py-1.5 text-sm text-ff-text-secondary hover-ff" aria-label="Meeting menu">
             ···
           </button>
           {menuOpen ? (
-            <div className="absolute right-0 z-20 mt-1 w-48 rounded-xl border border-white/10 bg-[#242428] py-1 text-sm shadow-lg">
-              <button type="button" className="block w-full px-3 py-2 text-left hover:bg-white/5" onClick={() => { setMenuOpen(false); setEditing(true); }}>
+            <div className="absolute right-0 z-20 mt-1 w-48 rounded-xl border border-ff-strong bg-ff-panel py-1 text-sm shadow-lg">
+              <button type="button" className="block w-full px-3 py-2 text-left hover-ff" onClick={() => { setMenuOpen(false); setEditing(true); }}>
                 Edit meeting
               </button>
-              <button type="button" className="block w-full px-3 py-2 text-left hover:bg-white/5" onClick={() => { setMenuOpen(false); toast(`${meeting.participants.length} participants · ${formatDuration(meeting.duration_seconds)}`); }}>
+              <button type="button" className="block w-full px-3 py-2 text-left hover-ff" onClick={() => { setMenuOpen(false); toast(`${meeting.participants.length} participants · ${formatDuration(meeting.duration_seconds)}`); }}>
                 Meeting info
               </button>
-              <button type="button" className="block w-full px-3 py-2 text-left text-[#f87171] hover:bg-white/5" onClick={() => { setMenuOpen(false); setDeleting(true); }}>
+              <button type="button" className="block w-full px-3 py-2 text-left text-[#f87171] hover-ff" onClick={() => { setMenuOpen(false); setDeleting(true); }}>
                 Delete
               </button>
             </div>
           ) : null}
         </div>
       </header>
-      <div className="flex items-center gap-2 border-b border-white/5 bg-[#17171a] px-3 py-1.5">
-        <span className="text-[11px] font-medium tracking-wide text-[#71717a]">MEDIA</span>
-        <button
-          type="button"
-          onClick={() => setSource("audio")}
-          className={`rounded-md px-2.5 py-1 text-[13px] ${source === "audio" ? "bg-[#6d4aff] text-white" : "text-[#d4d4d8] hover:bg-white/5"}`}
-        >
-          Audio
-        </button>
-        <button
-          type="button"
-          onClick={() => setSource("video")}
-          className={`rounded-md px-2.5 py-1 text-[13px] ${source === "video" ? "bg-[#6d4aff] text-white" : "text-[#d4d4d8] hover:bg-white/5"}`}
-        >
-          Video
-        </button>
+      <div className="shrink-0">
+        {meeting.youtube_video_id ? (
+          <VideoPlayer videoId={meeting.youtube_video_id} playerRef={playerRef} onTime={onTime} startAt={time} />
+        ) : (
+          <Player src={meeting.audio_path} playerRef={playerRef} onTime={onTime} />
+        )}
       </div>
-      {source === "audio" ? (
-        <Player src={meeting.audio_path} playerRef={playerRef} onTime={onTime} />
-      ) : (
-        <VideoPlayer playerRef={playerRef} onTime={onTime} startAt={time} />
-      )}
-      <div className="flex items-center gap-1 border-b border-white/5 px-3 xl:hidden">
-        <button type="button" onClick={() => setPane("notes")} className={`border-b-2 px-3 py-2 text-[13px] ${pane === "notes" ? "border-[#6d4aff] font-medium" : "border-transparent text-[#a1a1aa]"}`}>
+      <div className="flex shrink-0 items-center gap-1 border-b border-ff px-3 xl:hidden">
+        <button type="button" onClick={() => setPane("notes")} className={`border-b-2 px-3 py-2 text-[13px] ${pane === "notes" ? "border-[#6d4aff] font-medium" : "border-transparent text-ff-text-muted"}`}>
           Notes
         </button>
-        <button type="button" onClick={() => setPane("transcript")} className={`border-b-2 px-3 py-2 text-[13px] ${pane === "transcript" ? "border-[#6d4aff] font-medium" : "border-transparent text-[#a1a1aa]"}`}>
+        <button type="button" onClick={() => setPane("transcript")} className={`border-b-2 px-3 py-2 text-[13px] ${pane === "transcript" ? "border-[#6d4aff] font-medium" : "border-transparent text-ff-text-muted"}`}>
           Transcript
         </button>
       </div>
-      <div className="flex min-h-0 flex-1">
-        <nav className="flex w-11 shrink-0 flex-col items-center gap-0.5 border-r border-white/5 py-2">
+      <div className="flex flex-col xl:flex-row xl:items-start">
+        <nav className="flex w-11 shrink-0 flex-col items-center gap-0.5 border-r border-ff bg-ff-bg py-2">
           {TOOLS.map((tool) => (
             <button
               key={tool.id}
@@ -215,13 +199,13 @@ export function MeetingView() {
                 }
                 toast(`${tool.label} is coming soon`);
               }}
-              className="grid h-8 w-8 place-items-center rounded-md text-[#a1a1aa] hover:bg-white/5 hover:text-white"
+              className="grid h-8 w-8 place-items-center rounded-md text-ff-text-muted hover-ff hover-ff-text"
             >
               <ToolIcon name={tool.icon} />
             </button>
           ))}
         </nav>
-        <div className={`${pane === "notes" ? "block" : "hidden"} min-h-0 min-w-0 flex-1 xl:block`}>
+        <div className={`${pane === "notes" ? "flex" : "hidden"} min-w-0 flex-1 flex-col xl:flex xl:flex-[1.1]`}>
           <SummaryRail
             meeting={meeting}
             onChange={setMeeting}
@@ -231,8 +215,8 @@ export function MeetingView() {
             onExport={(format) => exportFile("summary", format)}
           />
         </div>
-        <section className={`${pane === "transcript" ? "flex" : "hidden"} min-h-0 min-w-0 flex-1 flex-col xl:flex xl:border-l xl:border-white/5`}>
-          <div className="flex items-center gap-2 border-b border-white/5 px-3 py-2">
+        <section className={`${pane === "transcript" ? "flex" : "hidden"} min-w-0 flex-1 flex-col bg-ff-bg xl:flex xl:flex-1 xl:border-l xl:border-ff`}>
+          <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-ff bg-ff-bg px-3 py-2">
             <span className="hidden shrink-0 text-[13px] font-medium xl:inline">Transcript</span>
             <input
               value={query}
@@ -241,27 +225,25 @@ export function MeetingView() {
                 setMatchCursor(0);
               }}
               placeholder="Find"
-              className="min-w-0 flex-1 rounded-md border border-white/10 bg-[#1c1c20] px-2.5 py-1 text-[13px] outline-none focus:border-[#6d4aff]"
+              className="min-w-0 flex-1 rounded-md border border-ff-strong bg-ff-elevated px-2.5 py-1 text-[13px] text-ff-text outline-none focus:border-[#6d4aff]"
             />
-            <span className="shrink-0 text-[11px] text-[#a1a1aa]">{query.trim() ? `${matches} found` : ""}</span>
-            <button type="button" onClick={() => step(-1)} disabled={!matches} className="shrink-0 text-[11px] text-[#d4d4d8] disabled:text-[#3f3f46]">
+            <span className="shrink-0 text-[11px] text-ff-text-muted">{query.trim() ? `${matches} found` : ""}</span>
+            <button type="button" onClick={() => step(-1)} disabled={!matches} className="shrink-0 text-[11px] text-ff-text-secondary disabled:text-ff-text-faint">
               Prev
             </button>
-            <button type="button" onClick={() => step(1)} disabled={!matches} className="shrink-0 text-[11px] text-[#d4d4d8] disabled:text-[#3f3f46]">
+            <button type="button" onClick={() => step(1)} disabled={!matches} className="shrink-0 text-[11px] text-ff-text-secondary disabled:text-ff-text-faint">
               Next
             </button>
             <ExportMenu kind="transcript" onExport={(format) => exportFile("transcript", format)} />
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            <Transcript
-              segments={meeting.segments}
-              activeIndex={activeIndex}
-              query={query}
-              matchCursor={matchCursor}
-              followSearch={Boolean(query.trim())}
-              onSeek={(seconds) => playerRef.current?.seek(seconds)}
-            />
-          </div>
+          <Transcript
+            segments={meeting.segments}
+            activeIndex={activeIndex}
+            query={query}
+            matchCursor={matchCursor}
+            followSearch={Boolean(query.trim())}
+            onSeek={(seconds) => playerRef.current?.seek(seconds)}
+          />
         </section>
       </div>
       {editing ? (

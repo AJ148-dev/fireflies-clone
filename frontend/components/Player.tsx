@@ -65,7 +65,7 @@ export function Player({
   }
 
   return (
-    <div className="flex items-center gap-3 border-b border-white/5 bg-[#17171a] px-3 py-2">
+    <div className="flex items-center gap-3 border-b border-ff bg-ff-toolbar px-3 py-2">
       <audio ref={audioRef} src={src} preload="metadata" />
       <button
         type="button"
@@ -75,7 +75,7 @@ export function Player({
       >
         {playing ? "❚❚" : "▶"}
       </button>
-      <span className="w-10 text-xs tabular-nums text-[#6b7080]">{formatClock(time)}</span>
+      <span className="w-10 text-xs tabular-nums text-ff-text-muted">{formatClock(time)}</span>
       <div className="relative flex h-8 flex-1 items-center">
         <div className="pointer-events-none absolute inset-x-0 flex h-6 items-center justify-between overflow-hidden" aria-hidden="true">
           {Array.from({ length: 80 }, (_, index) => (
@@ -102,7 +102,7 @@ export function Player({
           className="relative z-10 h-8 w-full cursor-pointer appearance-none bg-transparent accent-[#6c4dff]"
         />
       </div>
-      <span className="w-10 text-right text-xs tabular-nums text-[#6b7080]">{formatClock(duration)}</span>
+      <span className="w-10 text-right text-xs tabular-nums text-ff-text-muted">{formatClock(duration)}</span>
     </div>
   );
 }

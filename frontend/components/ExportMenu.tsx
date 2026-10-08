@@ -45,18 +45,18 @@ export function ExportMenu({
         aria-haspopup="menu"
         aria-label={`Export ${title}`}
         onClick={() => setOpen((current) => !current)}
-        className="rounded-md border border-white/10 px-2.5 py-1 text-[12px] font-medium text-[#d4d4d8] hover:bg-white/5"
+        className="rounded-md border border-ff-strong px-2.5 py-1 text-[12px] font-medium text-ff-text-secondary hover-ff"
       >
         Export
       </button>
       {open ? (
-        <div role="menu" className="absolute right-0 z-30 mt-1 w-36 rounded-xl border border-white/10 bg-[#242428] py-1 text-sm shadow-lg">
+        <div role="menu" className="absolute right-0 z-30 mt-1 w-36 rounded-xl border border-ff-strong bg-ff-panel py-1 text-sm shadow-lg">
           {FORMATS.map((format) => (
             <button
               key={format.id}
               type="button"
               role="menuitem"
-              className="block w-full px-3 py-1.5 text-left text-[#e4e4e7] hover:bg-white/5"
+              className="block w-full px-3 py-1.5 text-left text-ff-text-secondary hover-ff"
               onClick={() => {
                 setOpen(false);
                 onExport(format.id);

@@ -24,14 +24,14 @@ export function ParticipantField({
 
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-medium text-[#a1a1aa]">Participants</label>
-      <div className="flex min-h-11 flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-[#121214] px-3 py-2">
+      <label className="mb-1.5 block text-xs font-medium text-ff-text-muted">Participants</label>
+      <div className="flex min-h-11 flex-wrap items-center gap-2 rounded-xl border border-ff-strong bg-ff-elevated px-3 py-2">
         {names.map((name) => (
           <button
             key={name}
             type="button"
             onClick={() => onChange(names.filter((item) => item !== name))}
-            className="rounded-full bg-[#2a2a2e] px-2.5 py-1 text-xs font-medium text-[#e4e4e7] hover:bg-[#34343a]"
+            className="rounded-full bg-ff-chip px-2.5 py-1 text-xs font-medium text-ff-text-secondary hover:bg-ff-chip-hover"
             title="Remove"
           >
             {name} ×
@@ -48,7 +48,7 @@ export function ParticipantField({
           }}
           onBlur={addName}
           placeholder="Add a name"
-          className="min-w-[120px] flex-1 bg-transparent text-sm outline-none"
+          className="min-w-[120px] flex-1 bg-transparent text-sm text-ff-text outline-none placeholder:text-ff-text-faint"
         />
       </div>
     </div>

@@ -50,42 +50,50 @@ export function TasksScreen() {
   const visible = tab === "mine" ? rows.filter((row) => !row.is_done) : rows;
 
   return (
-    <div className="h-full overflow-y-auto bg-[#121214] px-8 py-8">
+    <div className="h-full overflow-y-auto bg-ff-bg px-8 py-8 text-ff-text">
       <div className="mx-auto max-w-3xl">
         <div className="flex items-center">
           <div className="flex gap-2">
-            <button type="button" onClick={() => setTab("mine")} className={`rounded-lg px-3 py-1 text-[13px] ${tab === "mine" ? "bg-[#2a2a2e]" : "text-[#a1a1aa]"}`}>
+            <button
+              type="button"
+              onClick={() => setTab("mine")}
+              className={`rounded-lg px-3 py-1 text-[13px] ${tab === "mine" ? "bg-ff-tab-active-bg text-ff-tab-active-text" : "text-ff-text-muted"}`}
+            >
               My Tasks
             </button>
-            <button type="button" onClick={() => setTab("all")} className={`rounded-lg px-3 py-1 text-[13px] ${tab === "all" ? "bg-[#2a2a2e]" : "text-[#a1a1aa]"}`}>
+            <button
+              type="button"
+              onClick={() => setTab("all")}
+              className={`rounded-lg px-3 py-1 text-[13px] ${tab === "all" ? "bg-ff-tab-active-bg text-ff-tab-active-text" : "text-ff-text-muted"}`}
+            >
               All Tasks
             </button>
           </div>
-          <button type="button" onClick={() => toast("Feedback is coming soon")} className="ml-auto text-[13px] text-[#a1a1aa]">
+          <button type="button" onClick={() => toast("Feedback is coming soon")} className="ml-auto text-[13px] text-ff-text-muted">
             Share Feedback
           </button>
         </div>
-        <div className="mt-4 flex items-center gap-3 rounded-xl border border-white/10 px-4 py-3">
-          <span className="text-sm text-[#d4d4d8]">Automatically send all your tasks to your work apps.</span>
-          <button type="button" onClick={() => toast("Connectors are coming soon")} className="ml-auto text-[13px] font-medium text-[#60a5fa]">
+        <div className="mt-4 flex items-center gap-3 rounded-xl border border-ff-strong bg-ff-elevated px-4 py-3">
+          <span className="text-sm text-ff-text-secondary">Automatically send all your tasks to your work apps.</span>
+          <button type="button" onClick={() => toast("Connectors are coming soon")} className="ml-auto text-[13px] font-medium text-[#2563eb]">
             Connect
           </button>
         </div>
 
         {loading ? (
-          <p className="py-16 text-center text-sm text-[#a1a1aa]">Loading tasks…</p>
+          <p className="py-16 text-center text-sm text-ff-text-muted">Loading tasks…</p>
         ) : visible.length === 0 ? (
           <div className="py-20 text-center">
             <p className="text-sm font-medium">All your meeting tasks in one place</p>
-            <p className="mt-2 text-[13px] text-[#a1a1aa]">Manage, assign and update all your meeting tasks here.</p>
-            <button type="button" onClick={() => setAdding(true)} className="mt-5 rounded-lg bg-[#6d4aff] px-4 py-2 text-sm font-medium">
+            <p className="mt-2 text-[13px] text-ff-text-muted">Manage, assign and update all your meeting tasks here.</p>
+            <button type="button" onClick={() => setAdding(true)} className="mt-5 rounded-lg bg-[#6d4aff] px-4 py-2 text-sm font-medium text-on-accent">
               + Now
             </button>
           </div>
         ) : (
           <ul className="mt-6 flex flex-col">
             {visible.map((row) => (
-              <li key={row.id} className="flex items-center gap-3 border-b border-white/5 py-3">
+              <li key={row.id} className="flex items-center gap-3 border-b border-ff py-3">
                 <input
                   type="checkbox"
                   checked={row.is_done}
@@ -95,14 +103,14 @@ export function TasksScreen() {
                     void api(`/action-items/${row.id}`, { method: "PATCH", body: JSON.stringify({ is_done: !row.is_done }) }).then(load);
                   }}
                 />
-                <span className={`min-w-0 flex-1 text-sm ${row.is_done ? "text-[#71717a] line-through" : ""}`}>{row.text}</span>
-                <Link href={`/meetings/${row.meetingId}`} className="truncate text-xs text-[#a1a1aa]">
+                <span className={`min-w-0 flex-1 text-sm ${row.is_done ? "text-ff-text-faint line-through" : ""}`}>{row.text}</span>
+                <Link href={`/meetings/${row.meetingId}`} className="truncate text-xs text-ff-text-muted">
                   {row.meetingTitle}
                 </Link>
               </li>
             ))}
             <li className="pt-4">
-              <button type="button" onClick={() => setAdding(true)} className="rounded-lg bg-[#6d4aff] px-4 py-2 text-sm font-medium">
+              <button type="button" onClick={() => setAdding(true)} className="rounded-lg bg-[#6d4aff] px-4 py-2 text-sm font-medium text-on-accent">
                 + Now
               </button>
             </li>
@@ -125,13 +133,27 @@ export function TasksScreen() {
                 .catch((err: Error) => toast(err.message, "err"));
             }}
           >
-            <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Task" className="min-w-[220px] flex-1 rounded-lg border border-white/10 bg-[#1c1c20] px-3 py-2 text-sm outline-none" />
-            <select value={meetingId} aria-label="Meeting" onChange={(event) => setMeetingId(Number(event.target.value))} className="rounded-lg border border-white/10 bg-[#1c1c20] px-2 py-2 text-sm">
+            <input
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              placeholder="Task"
+              className="min-w-[220px] flex-1 rounded-lg border border-ff-strong bg-ff-elevated px-3 py-2 text-sm text-ff-text outline-none"
+            />
+            <select
+              value={meetingId}
+              aria-label="Meeting"
+              onChange={(event) => setMeetingId(Number(event.target.value))}
+              className="rounded-lg border border-ff-strong bg-ff-elevated px-2 py-2 text-sm text-ff-text"
+            >
               {meetings.map((meeting) => (
-                <option key={meeting.id} value={meeting.id}>{meeting.title}</option>
+                <option key={meeting.id} value={meeting.id}>
+                  {meeting.title}
+                </option>
               ))}
             </select>
-            <button type="submit" className="rounded-lg bg-[#6d4aff] px-3 py-2 text-sm">Add</button>
+            <button type="submit" className="rounded-lg bg-[#6d4aff] px-3 py-2 text-sm text-on-accent">
+              Add
+            </button>
           </form>
         ) : null}
       </div>

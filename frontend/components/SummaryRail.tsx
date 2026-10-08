@@ -54,34 +54,34 @@ export function SummaryRail({
   const owner = meeting.participants[0]?.name ?? "Notes";
 
   return (
-    <aside className="flex h-full min-h-0 min-w-0 flex-col bg-[#121214]">
+    <aside className="flex min-w-0 flex-col bg-ff-bg text-ff-text">
       <div className="flex items-center gap-2 px-8 pt-3">
         <span className="text-[13px] font-medium">Summary</span>
         <div className="ml-auto flex items-center gap-2">
           <ExportMenu kind="summary" onExport={onExport} />
-          <button type="button" onClick={() => void copySummary()} className="text-[12px] text-[#a1a1aa] hover:text-white">
+          <button type="button" onClick={() => void copySummary()} className="text-[12px] text-ff-text-muted hover-ff-text">
             Copy
           </button>
         </div>
       </div>
-      <div id="outline" className="mx-auto flex w-full max-w-3xl flex-col gap-8 overflow-y-auto px-8 py-4">
+      <div id="outline" className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-8 py-4 pb-16">
         {sections.map((section, index) => (
           <section key={section.title}>
             <div className="flex items-baseline gap-2">
               <h2 className="text-lg font-semibold">{section.title}</h2>
               {section.start !== null ? (
-                <button type="button" onClick={() => onSeek(section.start!)} className="text-xs text-[#a78bfa]">
+                <button type="button" onClick={() => onSeek(section.start!)} className="text-xs text-ff-link">
                   {formatStamp(section.start)}
                 </button>
               ) : null}
             </div>
-            <p className="mt-2 text-sm leading-6 text-[#d4d4d8]">{index === 0 ? meeting.summary?.body || section.lead : section.lead}</p>
+            <p className="mt-2 text-sm leading-6 text-ff-text-secondary">{index === 0 ? meeting.summary?.body || section.lead : section.lead}</p>
             {section.bullets.length > 0 ? (
-              <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-[#e4e4e7]">
+              <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-ff-text-secondary">
                 {section.bullets.map((bullet) => (
                   <li key={`${bullet.start}-${bullet.text}`}>
                     {bullet.text}{" "}
-                    <button type="button" onClick={() => onSeek(bullet.start)} className="text-[#a78bfa]">
+                    <button type="button" onClick={() => onSeek(bullet.start)} className="text-ff-link">
                       ({formatStamp(bullet.start)})
                     </button>
                   </li>
@@ -93,7 +93,7 @@ export function SummaryRail({
         <section id="actions">
           <h2 className="text-base font-semibold">{owner}</h2>
           <ul className="mt-3 flex flex-col gap-2">
-            {meeting.action_items.length === 0 ? <li className="text-sm text-[#a1a1aa]">No action items yet.</li> : null}
+            {meeting.action_items.length === 0 ? <li className="text-sm text-ff-text-muted">No action items yet.</li> : null}
             {meeting.action_items.map((item) => (
               <ActionRow
                 key={item.id}
@@ -137,9 +137,9 @@ export function SummaryRail({
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               placeholder="Add an action item"
-              className="min-w-0 flex-1 rounded-lg border border-white/10 bg-[#1c1c20] px-3 py-2 text-sm outline-none focus:border-[#6d4aff]"
+              className="min-w-0 flex-1 rounded-lg border border-ff-strong bg-ff-elevated px-3 py-2 text-sm text-ff-text outline-none focus:border-[#6d4aff]"
             />
-            <button type="submit" className="rounded-md bg-[#6d4aff] px-3 text-[13px] font-medium">
+            <button type="submit" className="rounded-md bg-[#6d4aff] px-3 text-[13px] font-medium text-on-accent">
               Add
             </button>
           </form>
@@ -205,15 +205,15 @@ function ActionRow({
           onKeyDown={(event) => {
             if (event.key === "Enter") onSave();
           }}
-          className="min-w-0 flex-1 rounded-md border border-white/10 bg-[#121214] px-2 py-1 text-sm"
+          className="min-w-0 flex-1 rounded-md border border-ff-strong bg-ff-bg px-2 py-1 text-sm text-ff-text"
           autoFocus
         />
       ) : (
-        <button type="button" onClick={onEdit} className={`flex-1 text-left text-sm ${item.is_done ? "text-[#98a0b3] line-through" : ""}`}>
+        <button type="button" onClick={onEdit} className={`flex-1 text-left text-sm text-ff-text ${item.is_done ? "text-ff-text-muted line-through" : ""}`}>
           {item.text}
         </button>
       )}
-      <button type="button" onClick={onDelete} className="text-xs text-[#98a0b3]" aria-label="Delete action item">
+      <button type="button" onClick={onDelete} className="text-xs text-ff-text-muted" aria-label="Delete action item">
         ×
       </button>
     </li>
