@@ -56,14 +56,9 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
             <GlobalSearch />
             <div className="ml-auto flex items-center gap-2">
               {!collapsed ? (
-                <>
-                  <span className="hidden items-center gap-1.5 text-xs text-ff-plan-text lg:flex">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e]" />3 Free meetings
-                  </span>
-                  <Link href="/upgrade" className="rounded-md border border-ff-plan bg-ff-plan-bg px-2 py-1 text-xs font-medium text-ff-plan-text hover:bg-[#dcfce7]">
-                    Upgrade
-                  </Link>
-                </>
+                <Link href="/upgrade" className="rounded-md border border-ff-plan bg-ff-plan-bg px-2 py-1 text-xs font-medium text-ff-plan-text hover:bg-[#dcfce7]">
+                  Upgrade
+                </Link>
               ) : null}
               <ThemeToggle />
               <button type="button" aria-label="Notifications" onClick={() => toast("No new notifications")} className="text-ff-text-secondary hover:text-ff-text">
