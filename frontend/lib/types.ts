@@ -27,6 +27,7 @@ export type ActionItem = {
 export type MeetingDetail = MeetingCard & {
   notes_status?: "provided" | "generated" | "failed" | "skipped";
   audio_path: string;
+  youtube_video_id: string | null;
   summary: { body: string } | null;
   topics: { id: number; title: string; start_seconds: number | null; position: number }[];
   action_items: ActionItem[];

@@ -17,14 +17,6 @@ import { activeSegmentIndex } from "@/lib/activeSegment";
 import { avatarColor, formatDate, formatDuration, formatTimeOfDay, initials } from "@/lib/formatTime";
 import type { MeetingDetail } from "@/lib/types";
 
-const TOOLS = [
-  { id: "search", label: "Smart Search", icon: "search" },
-  { id: "index", label: "Index", icon: "index" },
-  { id: "soundbites", label: "Soundbites", icon: "mic" },
-  { id: "comments", label: "Comments", icon: "chat" },
-  { id: "bookmarks", label: "Bookmarks", icon: "mark" },
-] as const;
-
 export function MeetingView() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -39,6 +31,7 @@ export function MeetingView() {
   const [deleting, setDeleting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [pane, setPane] = useState<"notes" | "transcript">("notes");
+  const [sideTab, setSideTab] = useState<"transcript" | "ask">("transcript");
   const onTime = useCallback((seconds: number) => setTime(seconds), []);
 
   useEffect(() => {
@@ -60,45 +53,6 @@ export function MeetingView() {
   const matches = countMatches(meeting.segments, query);
   const activeIndex = activeSegmentIndex(meeting.segments, time);
 
-  function ToolIcon({ name }: { name: (typeof TOOLS)[number]["icon"] }) {
-  const common = { width: 16, height: 16, viewBox: "0 0 16 16", fill: "none", "aria-hidden": true as const };
-  if (name === "search") {
-    return (
-      <svg {...common}>
-        <circle cx="7" cy="7" r="4.2" stroke="currentColor" strokeWidth="1.4" />
-        <path d="M10.2 10.2 13 13" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-      </svg>
-    );
-  }
-  if (name === "index") {
-    return (
-      <svg {...common}>
-        <path d="M3 4h10M3 8h10M3 12h7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-      </svg>
-    );
-  }
-  if (name === "mic") {
-    return (
-      <svg {...common}>
-        <rect x="6" y="2" width="4" height="7" rx="2" stroke="currentColor" strokeWidth="1.4" />
-        <path d="M4 8a4 4 0 0 0 8 0M8 12v2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-      </svg>
-    );
-  }
-  if (name === "chat") {
-    return (
-      <svg {...common}>
-        <path d="M3 4.5h10v6H6l-3 2.2V4.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-  return (
-    <svg {...common}>
-      <path d="M4 2.5h8v11l-4-2.2-4 2.2v-11Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
   function step(direction: number) {
     if (matches === 0) return;
     setMatchCursor((current) => (current + direction + matches) % matches);
@@ -113,7 +67,7 @@ export function MeetingView() {
   }
 
   return (
-    <div className="flex flex-col bg-ff-bg text-ff-text">
+    <div className="flex h-full min-h-0 flex-col bg-ff-bg text-ff-text">
       <header className="flex shrink-0 items-center gap-3 border-b border-ff bg-ff-bg px-3 py-2">
         <Link href="/meetings" className="rounded-md px-2 py-1 text-[13px] text-ff-text-muted hover-ff">
           Meetings
@@ -165,86 +119,103 @@ export function MeetingView() {
           ) : null}
         </div>
       </header>
-      <div className="shrink-0">
-        {meeting.youtube_video_id ? (
-          <VideoPlayer videoId={meeting.youtube_video_id} playerRef={playerRef} onTime={onTime} startAt={time} />
-        ) : (
-          <Player src={meeting.audio_path} playerRef={playerRef} onTime={onTime} />
-        )}
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
+        <div
+          className={`min-w-0 overflow-y-auto lg:min-h-0 lg:flex-1 lg:border-r lg:border-ff ${pane === "notes" ? "min-h-0 flex-1" : "shrink-0"}`}
+        >
+          <div className="mx-auto w-full max-w-4xl">
+            <div className="px-4 pt-4 lg:px-8 lg:pt-6">
+              {meeting.youtube_video_id ? (
+                <VideoPlayer videoId={meeting.youtube_video_id} playerRef={playerRef} onTime={onTime} startAt={time} />
+              ) : (
+                <Player src={meeting.audio_path} playerRef={playerRef} onTime={onTime} />
+              )}
+            </div>
+            <div className={pane === "notes" ? "block" : "hidden lg:block"}>
+              <SummaryRail
+                meeting={meeting}
+                onChange={setMeeting}
+                onSeek={(seconds) => playerRef.current?.seek(seconds)}
+                onError={(message) => toast(message, "err")}
+                onCopied={() => toast("Summary copied")}
+                onExport={(format) => exportFile("summary", format)}
+              />
+            </div>
+          </div>
+        </div>
+        <aside
+          className={`${pane === "transcript" ? "flex" : "hidden"} min-h-0 w-full min-w-0 flex-col bg-ff-bg lg:flex lg:w-[min(100%,420px)] lg:shrink-0 xl:w-[440px]`}
+        >
+          <div className="flex shrink-0 border-b border-ff px-2 pt-1">
+            <button
+              type="button"
+              onClick={() => setSideTab("transcript")}
+              className={`border-b-2 px-3 py-2.5 text-[13px] font-medium ${sideTab === "transcript" ? "border-[#6d4aff] text-ff-text" : "border-transparent text-ff-text-muted"}`}
+            >
+              Transcript
+            </button>
+            <button
+              type="button"
+              onClick={() => setSideTab("ask")}
+              className={`border-b-2 px-3 py-2.5 text-[13px] font-medium ${sideTab === "ask" ? "border-[#6d4aff] text-ff-text" : "border-transparent text-ff-text-muted"}`}
+            >
+              AskFred
+            </button>
+          </div>
+          {sideTab === "transcript" ? (
+            <>
+              <div className="flex shrink-0 items-center gap-2 border-b border-ff px-3 py-2">
+                <input
+                  value={query}
+                  onChange={(event) => {
+                    setQuery(event.target.value);
+                    setMatchCursor(0);
+                  }}
+                  placeholder="Search transcript"
+                  className="min-w-0 flex-1 rounded-md border border-ff-strong bg-ff-elevated px-2.5 py-1.5 text-[13px] text-ff-text outline-none focus:border-[#6d4aff]"
+                />
+                <span className="shrink-0 text-[11px] text-ff-text-muted">{query.trim() ? `${matches}` : ""}</span>
+                <button type="button" onClick={() => step(-1)} disabled={!matches} className="shrink-0 text-[11px] text-ff-text-secondary disabled:text-ff-text-faint">
+                  ↑
+                </button>
+                <button type="button" onClick={() => step(1)} disabled={!matches} className="shrink-0 text-[11px] text-ff-text-secondary disabled:text-ff-text-faint">
+                  ↓
+                </button>
+                <ExportMenu kind="transcript" onExport={(format) => exportFile("transcript", format)} />
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                <Transcript
+                  segments={meeting.segments}
+                  activeIndex={activeIndex}
+                  query={query}
+                  matchCursor={matchCursor}
+                  followSearch={Boolean(query.trim())}
+                  onSeek={(seconds) => playerRef.current?.seek(seconds)}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4">
+              <p className="text-sm text-ff-text-secondary">
+                Ask questions about this meeting. Full chat lives on the AskFred page for now.
+              </p>
+              <Link
+                href="/ask"
+                className="mt-4 inline-flex w-fit rounded-lg bg-[#6d4aff] px-4 py-2 text-[13px] font-medium text-on-accent"
+              >
+                Open AskFred
+              </Link>
+            </div>
+          )}
+        </aside>
       </div>
-      <div className="flex shrink-0 items-center gap-1 border-b border-ff px-3 xl:hidden">
-        <button type="button" onClick={() => setPane("notes")} className={`border-b-2 px-3 py-2 text-[13px] ${pane === "notes" ? "border-[#6d4aff] font-medium" : "border-transparent text-ff-text-muted"}`}>
-          Notes
+      <div className="flex shrink-0 items-center justify-center gap-1 border-t border-ff bg-ff-bg px-3 py-1 lg:hidden">
+        <button type="button" onClick={() => setPane("notes")} className={`flex-1 rounded-md py-2 text-[13px] ${pane === "notes" ? "bg-ff-active font-medium" : "text-ff-text-muted"}`}>
+          Summary
         </button>
-        <button type="button" onClick={() => setPane("transcript")} className={`border-b-2 px-3 py-2 text-[13px] ${pane === "transcript" ? "border-[#6d4aff] font-medium" : "border-transparent text-ff-text-muted"}`}>
+        <button type="button" onClick={() => setPane("transcript")} className={`flex-1 rounded-md py-2 text-[13px] ${pane === "transcript" ? "bg-ff-active font-medium" : "text-ff-text-muted"}`}>
           Transcript
         </button>
-      </div>
-      <div className="flex flex-col xl:flex-row xl:items-start">
-        <nav className="flex w-11 shrink-0 flex-col items-center gap-0.5 border-r border-ff bg-ff-bg py-2">
-          {TOOLS.map((tool) => (
-            <button
-              key={tool.id}
-              type="button"
-              title={tool.label}
-              onClick={() => {
-                if (tool.id === "search") {
-                  setPane("transcript");
-                  return;
-                }
-                if (tool.id === "index") {
-                  setPane("notes");
-                  setTimeout(() => document.getElementById("outline")?.scrollIntoView({ block: "start" }), 0);
-                  return;
-                }
-                toast(`${tool.label} is coming soon`);
-              }}
-              className="grid h-8 w-8 place-items-center rounded-md text-ff-text-muted hover-ff hover-ff-text"
-            >
-              <ToolIcon name={tool.icon} />
-            </button>
-          ))}
-        </nav>
-        <div className={`${pane === "notes" ? "flex" : "hidden"} min-w-0 flex-1 flex-col xl:flex xl:flex-[1.1]`}>
-          <SummaryRail
-            meeting={meeting}
-            onChange={setMeeting}
-            onSeek={(seconds) => playerRef.current?.seek(seconds)}
-            onError={(message) => toast(message, "err")}
-            onCopied={() => toast("Summary copied")}
-            onExport={(format) => exportFile("summary", format)}
-          />
-        </div>
-        <section className={`${pane === "transcript" ? "flex" : "hidden"} min-w-0 flex-1 flex-col bg-ff-bg xl:flex xl:flex-1 xl:border-l xl:border-ff`}>
-          <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-ff bg-ff-bg px-3 py-2">
-            <span className="hidden shrink-0 text-[13px] font-medium xl:inline">Transcript</span>
-            <input
-              value={query}
-              onChange={(event) => {
-                setQuery(event.target.value);
-                setMatchCursor(0);
-              }}
-              placeholder="Find"
-              className="min-w-0 flex-1 rounded-md border border-ff-strong bg-ff-elevated px-2.5 py-1 text-[13px] text-ff-text outline-none focus:border-[#6d4aff]"
-            />
-            <span className="shrink-0 text-[11px] text-ff-text-muted">{query.trim() ? `${matches} found` : ""}</span>
-            <button type="button" onClick={() => step(-1)} disabled={!matches} className="shrink-0 text-[11px] text-ff-text-secondary disabled:text-ff-text-faint">
-              Prev
-            </button>
-            <button type="button" onClick={() => step(1)} disabled={!matches} className="shrink-0 text-[11px] text-ff-text-secondary disabled:text-ff-text-faint">
-              Next
-            </button>
-            <ExportMenu kind="transcript" onExport={(format) => exportFile("transcript", format)} />
-          </div>
-          <Transcript
-            segments={meeting.segments}
-            activeIndex={activeIndex}
-            query={query}
-            matchCursor={matchCursor}
-            followSearch={Boolean(query.trim())}
-            onSeek={(seconds) => playerRef.current?.seek(seconds)}
-          />
-        </section>
       </div>
       {editing ? (
         <EditMeetingModal

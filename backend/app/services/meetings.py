@@ -204,6 +204,7 @@ def detail_payload(meeting: Meeting) -> dict:
     return {
         **card_payload(meeting),
         "audio_path": meeting.audio_path,
+        "youtube_video_id": meeting.youtube_video_id,
         "summary": {"body": meeting.summary.body} if meeting.summary else None,
         "topics": [
             {

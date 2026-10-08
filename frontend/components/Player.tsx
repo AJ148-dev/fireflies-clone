@@ -65,7 +65,7 @@ export function Player({
   }
 
   return (
-    <div className="flex items-center gap-3 border-b border-ff bg-ff-toolbar px-3 py-2">
+    <div className="flex items-center gap-3 rounded-xl border border-ff bg-ff-toolbar px-3 py-2">
       <audio ref={audioRef} src={src} preload="metadata" />
       <button
         type="button"

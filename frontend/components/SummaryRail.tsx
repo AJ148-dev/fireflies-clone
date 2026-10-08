@@ -55,44 +55,13 @@ export function SummaryRail({
 
   return (
     <aside className="flex min-w-0 flex-col bg-ff-bg text-ff-text">
-      <div className="flex items-center gap-2 px-8 pt-3">
-        <span className="text-[13px] font-medium">Summary</span>
-        <div className="ml-auto flex items-center gap-2">
-          <ExportMenu kind="summary" onExport={onExport} />
-          <button type="button" onClick={() => void copySummary()} className="text-[12px] text-ff-text-muted hover-ff-text">
-            Copy
-          </button>
-        </div>
-      </div>
-      <div id="outline" className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-8 py-4 pb-16">
-        {sections.map((section, index) => (
-          <section key={section.title}>
-            <div className="flex items-baseline gap-2">
-              <h2 className="text-lg font-semibold">{section.title}</h2>
-              {section.start !== null ? (
-                <button type="button" onClick={() => onSeek(section.start!)} className="text-xs text-ff-link">
-                  {formatStamp(section.start)}
-                </button>
-              ) : null}
-            </div>
-            <p className="mt-2 text-sm leading-6 text-ff-text-secondary">{index === 0 ? meeting.summary?.body || section.lead : section.lead}</p>
-            {section.bullets.length > 0 ? (
-              <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-ff-text-secondary">
-                {section.bullets.map((bullet) => (
-                  <li key={`${bullet.start}-${bullet.text}`}>
-                    {bullet.text}{" "}
-                    <button type="button" onClick={() => onSeek(bullet.start)} className="text-ff-link">
-                      ({formatStamp(bullet.start)})
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </section>
-        ))}
+      <div className="flex flex-col gap-8 px-6 py-5 pb-10 lg:px-8">
         <section id="actions">
-          <h2 className="text-base font-semibold">{owner}</h2>
-          <ul className="mt-3 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <h2 className="text-[15px] font-semibold">Action items</h2>
+          </div>
+          <p className="mt-1 text-[13px] font-medium text-ff-text">{owner}</p>
+          <ul className="mt-3 flex flex-col gap-2.5">
             {meeting.action_items.length === 0 ? <li className="text-sm text-ff-text-muted">No action items yet.</li> : null}
             {meeting.action_items.map((item) => (
               <ActionRow
@@ -144,6 +113,42 @@ export function SummaryRail({
             </button>
           </form>
         </section>
+        <div className="flex items-center gap-2 border-t border-ff pt-6">
+          <span className="text-[13px] font-medium">Summary</span>
+          <div className="ml-auto flex items-center gap-2">
+            <ExportMenu kind="summary" onExport={onExport} />
+            <button type="button" onClick={() => void copySummary()} className="text-[12px] text-ff-text-muted hover-ff-text">
+              Copy
+            </button>
+          </div>
+        </div>
+        <div id="outline" className="flex flex-col gap-8">
+        {sections.map((section, index) => (
+          <section key={section.title}>
+            <div className="flex items-baseline gap-2">
+              <h2 className="text-lg font-semibold">{section.title}</h2>
+              {section.start !== null ? (
+                <button type="button" onClick={() => onSeek(section.start!)} className="text-xs text-ff-link">
+                  {formatStamp(section.start)}
+                </button>
+              ) : null}
+            </div>
+            <p className="mt-2 text-sm leading-6 text-ff-text-secondary">{index === 0 ? meeting.summary?.body || section.lead : section.lead}</p>
+            {section.bullets.length > 0 ? (
+              <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-ff-text-secondary">
+                {section.bullets.map((bullet) => (
+                  <li key={`${bullet.start}-${bullet.text}`}>
+                    {bullet.text}{" "}
+                    <button type="button" onClick={() => onSeek(bullet.start)} className="text-ff-link">
+                      ({formatStamp(bullet.start)})
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </section>
+        ))}
+        </div>
       </div>
     </aside>
   );

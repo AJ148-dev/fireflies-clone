@@ -7,6 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import configure
 from app.models import Base
 from app.routers import action_items, meetings
+from app.migrate import backfill_youtube_video_ids, ensure_meeting_columns
+from app.scaler_transcript import resync_scaler_transcripts
 from app.seed import seed_if_empty
 from app.services.notes import load_env_file
 
@@ -19,8 +21,11 @@ async def lifespan(_app: FastAPI):
 
     configure()
     Base.metadata.create_all(bind=database.engine)
+    ensure_meeting_columns(database.engine)
     db = database.SessionLocal()
     try:
+        backfill_youtube_video_ids(db)
+        resync_scaler_transcripts(db)
         if os.environ.get("SEED", "1") != "0":
             seed_if_empty(db)
     finally:

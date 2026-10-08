@@ -34,7 +34,6 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
   const [inviteOpen, setInviteOpen] = useState(true);
   const [profileOpen, setProfileOpen] = useState(false);
   const collapsed = pathname.startsWith("/meetings") || pathname.startsWith("/upgrade") || pathname.startsWith("/ask");
-  const meetingDetailScroll = /^\/meetings\/[^/]+$/.test(pathname);
   const pageLabel = pathname === "/ask" ? "AskFred" : pathname.startsWith("/meetings") ? "Meetings" : pathname.startsWith("/tasks") ? "Tasks" : pathname.startsWith("/analytics") ? "Analytics" : pathname.startsWith("/upgrade") ? "Plan" : pathname === "/settings" ? "Settings" : "Home";
 
   return (
@@ -83,7 +82,7 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
               </Link>
             </div>
           </header>
-          <div className={`min-h-0 flex-1 bg-ff-bg ${meetingDetailScroll ? "overflow-y-auto" : "overflow-hidden"}`}>{children}</div>
+          <div className="min-h-0 flex-1 overflow-hidden bg-ff-bg">{children}</div>
           <button
             type="button"
             aria-label="Help"

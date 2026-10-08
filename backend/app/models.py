@@ -29,6 +29,7 @@ class Meeting(Base):
     started_at = Column(DateTime(timezone=True), nullable=False)
     duration_seconds = Column(Integer, nullable=False, default=0)
     audio_path = Column(String(255), nullable=False, default="/sample.wav")
+    youtube_video_id = Column(String(20), nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False)
     updated_at = Column(DateTime(timezone=True), nullable=False)
 

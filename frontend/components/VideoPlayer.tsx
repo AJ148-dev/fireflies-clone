@@ -4,8 +4,6 @@ import { useEffect, useImperativeHandle, useRef, type RefObject } from "react";
 
 import type { PlayerHandle } from "@/components/Player";
 
-const VIDEO_ID = "JH2lZdxS59c";
-
 type YTPlayer = {
   seekTo: (seconds: number, allowSeekAhead: boolean) => void;
   playVideo: () => void;
@@ -52,10 +50,12 @@ function loadYouTube() {
 }
 
 export function VideoPlayer({
+  videoId,
   playerRef,
   onTime,
   startAt,
 }: {
+  videoId: string;
   playerRef: RefObject<PlayerHandle | null>;
   onTime: (seconds: number) => void;
   startAt: number;
@@ -95,7 +95,7 @@ export function VideoPlayer({
       const host = hostRef.current;
       if (cancelled || !host || !window.YT) return;
       player.current = new window.YT.Player(host, {
-        videoId: VIDEO_ID,
+        videoId,
         width: "100%",
         height: "100%",
         playerVars: {
@@ -125,12 +125,12 @@ export function VideoPlayer({
       player.current?.destroy();
       player.current = null;
     };
-  }, [onTime]);
+  }, [onTime, videoId]);
 
   return (
-    <div className="border-b border-white/5 bg-black px-3 py-2">
-      <div className="mx-auto aspect-video w-full max-w-3xl overflow-hidden rounded-lg bg-black [&_iframe]:h-full [&_iframe]:w-full">
-        <div ref={hostRef} className="h-full w-full" />
+    <div className="shrink-0">
+      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black">
+        <div ref={hostRef} className="absolute inset-0 h-full w-full [&_iframe]:h-full [&_iframe]:w-full" />
       </div>
     </div>
   );
