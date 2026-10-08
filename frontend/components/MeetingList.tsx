@@ -65,7 +65,8 @@ export function MeetingList({
                 <Link href={`/meetings/${meeting.id}`} className="block min-w-0">
                   <span className="block truncate text-sm font-medium">{meeting.title}</span>
                   <span className="mt-0.5 block truncate text-xs text-[#6b7080]">
-                    {host} · {formatDate(meeting.started_at)} · {formatTimeOfDay(meeting.started_at)} · {formatDuration(meeting.duration_seconds)}
+                    {formatDate(meeting.started_at)} · {formatTimeOfDay(meeting.started_at)} · {formatDuration(meeting.duration_seconds)}
+                    {meeting.participants.length > 0 ? ` · ${meeting.participants.map((person) => person.name).join(", ")}` : ""}
                   </span>
                 </Link>
               )}

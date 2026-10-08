@@ -32,6 +32,7 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
   const toast = useToast();
   const [expanded, setExpanded] = useState(true);
   const [inviteOpen, setInviteOpen] = useState(true);
+  const [profileOpen, setProfileOpen] = useState(false);
   const narrow = pathname.startsWith("/meetings") || pathname.startsWith("/upgrade") || pathname.startsWith("/ask");
   const collapsed = narrow || !expanded;
   const pageLabel = pathname === "/ask" ? "AskFred" : pathname.startsWith("/meetings") ? "Meetings" : pathname.startsWith("/tasks") ? "Tasks" : pathname.startsWith("/analytics") ? "Analytics" : pathname.startsWith("/upgrade") ? "Upgrade" : pathname === "/settings" ? "Settings" : "Home";
@@ -45,12 +46,15 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
         </button>
       </div>
       <div className="flex min-h-0 flex-1">
-        <aside className={`flex shrink-0 flex-col border-r border-white/5 bg-[#17171a] ${collapsed ? "w-14 items-center py-2" : "w-[232px]"}`}>
+        <aside className={`relative flex shrink-0 flex-col border-r border-white/5 bg-[#17171a] ${collapsed ? "w-14 items-center py-2" : "w-[232px]"}`}>
           {collapsed ? (
-            <IconRail pathname={pathname} />
+            <IconRail pathname={pathname} onProfile={() => setProfileOpen((open) => !open)} />
           ) : (
-            <WideSidebar pathname={pathname} inviteOpen={inviteOpen} onCloseInvite={() => setInviteOpen(false)} onCollapse={() => setExpanded(false)} toast={toast} />
+            <WideSidebar pathname={pathname} inviteOpen={inviteOpen} onCloseInvite={() => setInviteOpen(false)} onCollapse={() => setExpanded(false)} onProfile={() => setProfileOpen((open) => !open)} toast={toast} />
           )}
+          {profileOpen ? (
+            <ProfileMenu collapsed={collapsed} onClose={() => setProfileOpen(false)} toast={toast} />
+          ) : null}
         </aside>
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
           <header className="flex items-center gap-3 border-b border-white/5 px-4 py-2">
@@ -93,11 +97,13 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
   );
 }
 
-function IconRail({ pathname }: { pathname: string }) {
+function IconRail({ pathname, onProfile }: { pathname: string; onProfile: () => void }) {
   const items = [...PRIMARY, ...SECONDARY, { href: "/upgrade", label: "Upgrade", icon: "bolt" }, { href: "/settings", label: "Settings", icon: "gear" }];
   return (
     <>
-      <span className="mb-2 grid h-7 w-7 place-items-center rounded-md bg-[#1f6f64] text-[11px] font-semibold text-white">A</span>
+      <button type="button" aria-label="Profile" onClick={onProfile} className="mb-2 grid h-7 w-7 place-items-center rounded-md bg-[#1f6f64] text-[11px] font-semibold text-white">
+        A
+      </button>
       {items.filter((item) => item.href).map((item) => {
         const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
         return (
@@ -115,20 +121,24 @@ function WideSidebar({
   inviteOpen,
   onCloseInvite,
   onCollapse,
+  onProfile,
   toast,
 }: {
   pathname: string;
   inviteOpen: boolean;
   onCloseInvite: () => void;
   onCollapse: () => void;
+  onProfile: () => void;
   toast: (message: string) => void;
 }) {
   return (
     <>
       <div className="flex items-center gap-2 px-3 py-3">
-        <span className="grid h-6 w-6 place-items-center rounded-md bg-[#1f6f64] text-[11px] font-semibold text-white">A</span>
-        <span className="truncate text-[13px] font-medium">23/CS/075</span>
-        <span className="text-[10px] text-[#a1a1aa]">▾</span>
+        <button type="button" aria-label="Profile" onClick={onProfile} className="flex min-w-0 items-center gap-2">
+          <span className="grid h-6 w-6 place-items-center rounded-md bg-[#1f6f64] text-[11px] font-semibold text-white">A</span>
+          <span className="truncate text-[13px] font-medium">23/CS/075</span>
+          <span className="text-[10px] text-[#a1a1aa]">▾</span>
+        </button>
         <button type="button" aria-label="Collapse sidebar" onClick={onCollapse} className="ml-auto text-[#a1a1aa]">
           <Icon name="panels" />
         </button>
@@ -178,6 +188,39 @@ function WideSidebar({
           <span className="h-1.5 w-1.5 rounded-full bg-[#3f3f46]" />
         </div>
         </div>
+      </div>
+    </>
+  );
+}
+
+function ProfileMenu({
+  collapsed,
+  onClose,
+  toast,
+}: {
+  collapsed: boolean;
+  onClose: () => void;
+  toast: (message: string) => void;
+}) {
+  return (
+    <>
+      <button type="button" aria-label="Close profile" className="fixed inset-0 z-20 cursor-default" onClick={onClose} />
+      <div className={`absolute z-30 w-52 rounded-xl border border-white/10 bg-[#242428] p-2 text-[13px] shadow-lg ${collapsed ? "top-2 left-12" : "top-12 left-3"}`}>
+        <p className="px-2 py-1 font-medium">23/CS/075</p>
+        <p className="px-2 pb-2 text-xs text-[#a1a1aa]">Profile is a placeholder. This workspace is already signed in.</p>
+        <button
+          type="button"
+          className="block w-full rounded-lg px-2 py-1.5 text-left hover:bg-white/5"
+          onClick={() => {
+            onClose();
+            toast("Account settings are coming soon");
+          }}
+        >
+          Account
+        </button>
+        <Link href="/settings" onClick={onClose} className="block rounded-lg px-2 py-1.5 hover:bg-white/5">
+          Settings
+        </Link>
       </div>
     </>
   );

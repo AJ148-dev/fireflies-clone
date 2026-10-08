@@ -1,13 +1,12 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { CreateMeetingModal } from "@/components/CreateMeetingModal";
 import { MeetingList } from "@/components/MeetingList";
 import { useToast } from "@/components/Toast";
 import { api } from "@/lib/api";
-import type { MeetingCard, MeetingDetail } from "@/lib/types";
+import type { MeetingCard } from "@/lib/types";
 
 const CHANNELS = [
   { id: "mine", label: "My Meetings" },
@@ -24,13 +23,11 @@ export function MeetingsScreen() {
   const from = params.get("from") ?? "";
   const to = params.get("to") ?? "";
   const sort = params.get("sort") === "oldest" ? "oldest" : "recent";
-  const scope = params.get("scope") === "shared" ? "shared" : "hosted";
+  const queryRef = useRef(params.toString());
   const [channel, setChannel] = useState("mine");
   const [channelQuery, setChannelQuery] = useState("");
-  const [filtersOpen, setFiltersOpen] = useState(Boolean(from || to));
   const [meetings, setMeetings] = useState<MeetingCard[]>([]);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [firstName, setFirstName] = useState("Maya");
   const [ask, setAsk] = useState("");
@@ -55,17 +52,21 @@ export function MeetingsScreen() {
   }, [q, from, to, sort, toast, reloadKey]);
 
   function update(next: Record<string, string>) {
-    const query = new URLSearchParams(params.toString());
+    const query = new URLSearchParams(queryRef.current);
     for (const [key, value] of Object.entries(next)) {
       if (value) query.set(key, value);
       else query.delete(key);
     }
     const text = query.toString();
+    queryRef.current = text;
     router.replace(text ? `/meetings?${text}` : "/meetings");
   }
 
+  useEffect(() => {
+    queryRef.current = params.toString();
+  }, [params]);
+
   const visibleChannels = CHANNELS.filter((item) => item.label.toLowerCase().includes(channelQuery.trim().toLowerCase()));
-  const showList = (channel === "mine" || channel === "all") && scope === "hosted";
 
   return (
     <div className="flex h-full min-h-0 bg-[#121214]">
@@ -81,7 +82,13 @@ export function MeetingsScreen() {
             <button
               key={item.id}
               type="button"
-              onClick={() => setChannel(item.id)}
+              onClick={() => {
+                if (item.id === "voice" || item.id === "uploads") {
+                  toast(`${item.label} are coming soon`);
+                  return;
+                }
+                setChannel(item.id);
+              }}
               className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] ${channel === item.id ? "bg-[#3a246b] font-medium" : "text-[#d4d4d8] hover:bg-white/5"}`}
             >
               <span className="text-[#a78bfa]">#</span>
@@ -99,46 +106,38 @@ export function MeetingsScreen() {
 
       <section className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-center gap-2 border-b border-white/5 px-4 py-2.5">
-          <button type="button" onClick={() => update({ scope: "" })} className={`rounded-lg px-3 py-1 text-[13px] ${scope === "hosted" ? "bg-[#2a2a2e]" : "text-[#a1a1aa]"}`}>
+          <button type="button" className="rounded-lg bg-[#2a2a2e] px-3 py-1 text-[13px]">
             Hosted by me
           </button>
-          <button type="button" onClick={() => update({ scope: "shared" })} className={`rounded-lg px-3 py-1 text-[13px] ${scope === "shared" ? "bg-[#2a2a2e]" : "text-[#a1a1aa]"}`}>
+          <button type="button" onClick={() => toast("Shared meetings are coming soon")} className="rounded-lg px-3 py-1 text-[13px] text-[#a1a1aa]">
             Shared with me
           </button>
-          <button type="button" onClick={() => setFiltersOpen((open) => !open)} className="rounded-lg border border-white/10 px-3 py-1 text-[13px] text-[#d4d4d8]">
-            Filters
-          </button>
-          <button
-            type="button"
-            aria-label="Search meetings"
-            onClick={() => document.querySelector<HTMLInputElement>('[aria-label="Search by title or keyword"]')?.focus()}
-            className="ml-auto text-[#a1a1aa]"
-          >
-            ⌕
-          </button>
         </div>
-        {filtersOpen ? (
-          <div className="flex flex-wrap items-center gap-2 border-b border-white/5 px-4 py-2">
-            <input type="date" value={from} aria-label="From date" suppressHydrationWarning onChange={(event) => update({ from: event.target.value })} className="rounded-lg border border-white/10 bg-[#1c1c20] px-2 py-1 text-[13px]" />
-            <input type="date" value={to} aria-label="To date" suppressHydrationWarning onChange={(event) => update({ to: event.target.value })} className="rounded-lg border border-white/10 bg-[#1c1c20] px-2 py-1 text-[13px]" />
-            <select value={sort} aria-label="Sort" onChange={(event) => update({ sort: event.target.value })} className="rounded-lg border border-white/10 bg-[#1c1c20] px-2 py-1 text-[13px]">
-              <option value="recent">Newest</option>
-              <option value="oldest">Oldest</option>
-            </select>
-          </div>
-        ) : null}
+        <div className="flex flex-wrap items-center gap-2 border-b border-white/5 px-4 py-2">
+          <input
+            aria-label="Search meetings"
+            value={q}
+            placeholder="Search by title or participant"
+            onChange={(event) => update({ q: event.target.value })}
+            className="min-w-[12rem] flex-1 rounded-lg border border-white/10 bg-[#1c1c20] px-2 py-1 text-[13px] outline-none placeholder:text-[#71717a]"
+          />
+          <input type="date" value={from} aria-label="From date" suppressHydrationWarning onChange={(event) => update({ from: event.target.value })} className="rounded-lg border border-white/10 bg-[#1c1c20] px-2 py-1 text-[13px]" />
+          <input type="date" value={to} aria-label="To date" suppressHydrationWarning onChange={(event) => update({ to: event.target.value })} className="rounded-lg border border-white/10 bg-[#1c1c20] px-2 py-1 text-[13px]" />
+          <select value={sort} aria-label="Sort" onChange={(event) => update({ sort: event.target.value })} className="rounded-lg border border-white/10 bg-[#1c1c20] px-2 py-1 text-[13px]">
+            <option value="recent">Newest</option>
+            <option value="oldest">Oldest</option>
+          </select>
+        </div>
         <div className="min-h-0 flex-1 overflow-y-auto">
           {loading ? (
             <p className="px-6 py-8 text-sm text-[#a1a1aa]">Loading meetings…</p>
-          ) : showList ? (
+          ) : (
             <MeetingList
               meetings={meetings}
               filtered={Boolean(q || from || to)}
               onClear={() => router.replace("/meetings")}
               onChanged={() => setReloadKey((key) => key + 1)}
             />
-          ) : (
-            <EmptyNotebook onCapture={() => setCreating(true)} />
           )}
         </div>
       </section>
@@ -190,27 +189,6 @@ export function MeetingsScreen() {
         </form>
       </aside>
 
-      {creating ? (
-        <CreateMeetingModal
-          onClose={() => setCreating(false)}
-          onCreated={(meeting: MeetingDetail) => {
-            toast("Meeting created");
-            router.push(`/meetings/${meeting.id}`);
-          }}
-        />
-      ) : null}
-    </div>
-  );
-}
-
-function EmptyNotebook({ onCapture }: { onCapture: () => void }) {
-  return (
-    <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-      <p className="text-sm font-medium">Looks like you haven&apos;t recorded a meeting yet</p>
-      <p className="mt-2 max-w-xs text-[13px] leading-5 text-[#a1a1aa]">Once you record your first meeting with Fireflies, it&apos;ll show up right here.</p>
-      <button type="button" onClick={onCapture} className="mt-5 rounded-lg bg-[#6d4aff] px-4 py-2 text-sm font-medium">
-        + Capture
-      </button>
     </div>
   );
 }
