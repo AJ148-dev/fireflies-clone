@@ -1,5 +1,5 @@
-import { formatClock, formatDate, formatDuration } from "./formatTime.ts";
-import type { MeetingDetail } from "./types.ts";
+import { formatClock, formatDate, formatDuration } from "./formatTime";
+import type { MeetingDetail } from "./types";
 
 export type ExportKind = "summary" | "transcript";
 export type ExportFormat = "txt" | "md" | "pdf";
