@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
+import { SearchModal } from "@/components/SearchModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ToastProvider, useToast } from "@/components/Toast";
 
@@ -52,9 +53,7 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
           <header className="flex items-center gap-3 border-b border-ff bg-ff-bg px-4 py-2">
             <span className="shrink-0 text-[13px] text-ff-text-secondary">{pageLabel}</span>
-            <Suspense fallback={<div className="h-8 w-full max-w-md rounded-lg bg-ff-elevated" />}>
-              <GlobalSearch />
-            </Suspense>
+            <GlobalSearch />
             <div className="ml-auto flex items-center gap-2">
               {!collapsed ? (
                 <>
@@ -311,29 +310,31 @@ function GmailMark() {
 }
 
 function GlobalSearch() {
-  const params = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
-  const q = params.get("q") ?? "";
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setOpen((current) => !current);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   return (
-    <div className="relative mx-auto w-full max-w-md">
-    <input
-      aria-label="Search by title or keyword"
-      value={q}
-      onChange={(event) => {
-        const next = new URLSearchParams(params.toString());
-        if (event.target.value) next.set("q", event.target.value);
-        else next.delete("q");
-        const base = pathname === "/" || pathname === "/meetings" ? pathname : "/meetings";
-        const query = next.toString();
-        router.replace(query ? `${base}?${query}` : base);
-      }}
-      placeholder="Search by title or keyword"
-      className="w-full rounded-lg border border-ff-strong bg-ff-elevated py-1.5 pr-12 pl-3 text-[13px] text-ff-text outline-none placeholder:text-ff-text-faint focus:border-[#6d4aff]"
-    />
-      <span className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded border border-ff-strong px-1 text-[10px] text-ff-text-faint">⌘K</span>
-    </div>
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="relative mx-auto block w-full max-w-md rounded-lg border border-ff-strong bg-ff-elevated py-1.5 pr-12 pl-3 text-left text-[13px] text-ff-text-faint hover:border-[#6d4aff]"
+      >
+        Search by title or keyword
+        <span className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded border border-ff-strong px-1 text-[10px]">⌘K</span>
+      </button>
+      {open ? <SearchModal onClose={() => setOpen(false)} /> : null}
+    </>
   );
 }
 
