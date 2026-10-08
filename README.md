@@ -95,5 +95,5 @@ Anything else returns 400 with the expected shape. Seeded meetings keep their st
 - Date filters use UTC calendar days. The date and time typed in the form are stored as that clock time in UTC, so the library date matches what was entered.
 - The hosted API needs a long-running disk for SQLite. A serverless filesystem will not keep new meetings. If the database file is missing, startup seeds the demo meetings again.
 - `DATABASE_PATH` chooses the SQLite file. `CORS_ORIGINS` is a comma-separated list. `SEED=0` skips seeding.
-- `GEMINI_API_KEY` and `GEMINI_MODEL` live in `backend/.env`. The key stays on the API. Restart the API after changing it.
+- `GROQ_API_KEY` and `GROQ_MODEL` live in `backend/.env`. When the Groq key is set, pasted and uploaded transcripts are summarized with Groq. `GEMINI_API_KEY` is the fallback. Restart the API after changing either key.
 - Uploads, integrations, analytics, live transcription, and real login are labeled coming soon.
