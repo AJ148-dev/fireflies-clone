@@ -21,7 +21,7 @@ const FREE_FEATURES = [
   "Soundbites",
   "Audio/video uploads",
   "Chrome extension",
-  "Fireflies mobile app",
+  "Scaler Flies mobile app",
   "Desktop app (download)",
   "API Access",
 ];
@@ -103,7 +103,7 @@ export function UpgradeScreen() {
         <div className="mt-8 grid items-stretch gap-4 xl:grid-cols-4">
           <PlanCard
             name="Free"
-            blurb="For individuals starting with Fireflies"
+            blurb="For individuals starting with Scaler Flies"
             price="$0"
             priceNote="Free forever"
             info="Storage and transcription limits apply on the Free plan."

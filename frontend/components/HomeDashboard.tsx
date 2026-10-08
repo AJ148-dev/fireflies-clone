@@ -65,7 +65,7 @@ export function HomeDashboard() {
         <div>
           <h1 className="text-2xl font-semibold">Welcome Aboard, {name}!</h1>
           <p className="home-hero-sub mt-2 max-w-md text-sm leading-6">
-            Fireflies is now ready to automate your meetings and streamline your workflows.
+            Scaler Flies is now ready to automate your meetings and streamline your workflows.
           </p>
         </div>
         <div className="home-hero-video relative hidden h-36 w-56 shrink-0 overflow-hidden rounded-xl border sm:block">
@@ -83,7 +83,7 @@ export function HomeDashboard() {
 
       <section className="mx-auto mt-8 max-w-3xl">
         <h2 className="text-base font-semibold">Quick Start</h2>
-        <p className="mt-1 text-sm text-ff-text-muted">Capture your first meeting or upload a recording to see Fireflies in action.</p>
+        <p className="mt-1 text-sm text-ff-text-muted">Capture your first meeting or upload a recording to see Scaler Flies in action.</p>
         <div className="mt-4 grid gap-3 lg:grid-cols-3">
           <button type="button" onClick={() => toast("Scheduling a live meeting is coming soon")} className="qs-schedule flex items-center justify-between rounded-xl px-4 py-4 text-sm font-medium">
             Schedule Meeting <span>›</span>
@@ -144,7 +144,7 @@ export function HomeDashboard() {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Fireflies intro video"
+          aria-label="Scaler Flies intro video"
           onClick={() => setPlayingIntro(false)}
           className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-4"
         >
@@ -160,7 +160,7 @@ export function HomeDashboard() {
             <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black shadow-2xl">
               <iframe
                 src={`https://www.youtube.com/embed/${INTRO_VIDEO_ID}?autoplay=1&start=1&rel=0`}
-                title="Fireflies intro video"
+                title="Scaler Flies intro video"
                 allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
                 allowFullScreen
                 className="absolute inset-0 h-full w-full"

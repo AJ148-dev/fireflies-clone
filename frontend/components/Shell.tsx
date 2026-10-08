@@ -214,7 +214,7 @@ function WideSidebar({
             <button type="button" aria-label="Dismiss invite" onClick={onCloseInvite} className="absolute top-2 right-2 text-xs text-ff-text-faint">
               ×
             </button>
-            <p className="pr-4 text-[13px] leading-5 text-ff-text-secondary">Invite coworkers to your Fireflies team</p>
+            <p className="pr-4 text-[13px] leading-5 text-ff-text-secondary">Invite coworkers to your Scaler Flies team</p>
             <button type="button" onClick={() => toast("Teams are coming soon")} className="mt-3 w-full rounded-lg bg-[#6d4aff] py-2 text-sm font-medium text-on-accent">
               Create Team
             </button>

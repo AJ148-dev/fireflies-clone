@@ -10,7 +10,7 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Fireflies",
+  title: "Scaler Flies",
   description: "Meeting notes, transcripts, and action items",
 };
 
