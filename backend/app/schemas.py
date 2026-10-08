@@ -41,6 +41,14 @@ class MeetingCreate(BaseModel):
     topics: list[TopicIn] = []
     action_items: list[ActionIn] = []
 
+    @field_validator("title")
+    @classmethod
+    def title_must_have_text(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("meeting title cannot be blank")
+        return value
+
     @model_validator(mode="after")
     def transcript_needs_a_format(self):
         if self.transcript_text and self.transcript_text.strip() and not self.transcript_format:
@@ -53,6 +61,16 @@ class MeetingUpdate(BaseModel):
     started_at: datetime | None = None
     duration_seconds: int | None = Field(default=None, ge=0)
     participant_names: list[str] | None = None
+
+    @field_validator("title")
+    @classmethod
+    def title_must_have_text(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        value = value.strip()
+        if not value:
+            raise ValueError("meeting title cannot be blank")
+        return value
 
 
 class ActionCreate(BaseModel):

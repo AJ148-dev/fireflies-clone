@@ -42,6 +42,58 @@ def test_paste_create_survives_reload(client):
     assert body["participants"][0]["name"] == "Ava Shah"
 
 
+def test_blank_create_survives_reload(client):
+    response = client.post(
+        "/api/meetings",
+        json={
+            "title": "Blank meeting",
+            "started_at": "2026-10-03T09:30:00Z",
+            "participant_names": ["Ava Shah"],
+        },
+    )
+    assert response.status_code == 201
+    created = response.json()
+    again = client.get(f"/api/meetings/{created['id']}").json()
+    assert again["title"] == "Blank meeting"
+    assert again["segments"] == []
+    assert again["summary"] is None
+    assert again["topics"] == []
+    assert again["action_items"] == []
+
+
+@pytest.mark.parametrize(
+    ("filename", "content", "expected_speaker"),
+    [
+        ("notes.txt", b"[00:01] Ava Shah: Plain text cue\n", "Ava Shah"),
+        (
+            "notes.vtt",
+            b"WEBVTT\n\n00:00:01.000 --> 00:00:03.000\nAva Shah: WebVTT cue\n",
+            "Ava Shah",
+        ),
+        (
+            "notes.json",
+            b'[{"speaker":"Ava Shah","start":1,"text":"JSON cue"}]',
+            "Ava Shah",
+        ),
+    ],
+)
+def test_upload_formats_survive_reload(client, filename, content, expected_speaker):
+    response = client.post(
+        "/api/meetings/import",
+        data={
+            "title": f"Imported {filename}",
+            "started_at": "2026-10-03T09:30:00Z",
+            "participant_names": "Ava Shah, Noah Kim",
+        },
+        files={"file": (filename, content, "text/plain")},
+    )
+    assert response.status_code == 201, response.text
+    created = response.json()
+    again = client.get(f"/api/meetings/{created['id']}").json()
+    assert again["segments"][0]["speaker_name"] == expected_speaker
+    assert [person["name"] for person in again["participants"]] == ["Ava Shah", "Noah Kim"]
+
+
 def test_bad_upload_is_400(client):
     response = client.post(
         "/api/meetings/import",
@@ -50,6 +102,12 @@ def test_bad_upload_is_400(client):
     )
     assert response.status_code == 400
     assert "expected" in response.json()["detail"]
+    unsupported = client.post(
+        "/api/meetings/import",
+        data={"title": "Bad", "started_at": "2026-10-02T15:00:00Z"},
+        files={"file": ("notes.csv", b"speaker,start,text", "text/csv")},
+    )
+    assert unsupported.status_code == 400
 
 
 def test_library_filters_participant_and_date(client):
@@ -79,8 +137,24 @@ def test_patch_and_delete(client):
     assert patched.status_code == 200
     assert patched.json()["title"] == "Renamed"
     assert patched.json()["participants"][0]["name"] == "Noah Kim"
+    assert patched.json()["segments"] == created["segments"]
+    assert patched.json()["summary"] == created["summary"]
+    assert patched.json()["topics"] == created["topics"]
+    assert patched.json()["action_items"] == created["action_items"]
     assert client.delete(f"/api/meetings/{created['id']}").status_code == 204
     assert client.get(f"/api/meetings/{created['id']}").status_code == 404
+
+
+def test_meeting_title_is_trimmed_and_cannot_be_blank(client):
+    created = _meeting(client, title="  Trimmed title  ")
+    assert created["title"] == "Trimmed title"
+
+    assert client.post(
+        "/api/meetings",
+        json={"title": "   ", "started_at": "2026-10-02T15:00:00Z"},
+    ).status_code == 422
+    assert client.patch(f"/api/meetings/{created['id']}", json={"title": "   "}).status_code == 422
+    assert client.get(f"/api/meetings/{created['id']}").json()["title"] == "Trimmed title"
 
 
 def test_action_item_toggle(client):
