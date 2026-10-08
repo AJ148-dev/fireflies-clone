@@ -231,7 +231,7 @@ export function MeetingView() {
             onExport={(format) => exportFile("summary", format)}
           />
         </div>
-        <section className={`${pane === "transcript" ? "flex" : "hidden"} min-h-0 min-w-0 flex-1 flex-col xl:flex xl:w-[420px] xl:flex-none xl:border-l xl:border-white/5`}>
+        <section className={`${pane === "transcript" ? "flex" : "hidden"} min-h-0 min-w-0 flex-1 flex-col xl:flex xl:border-l xl:border-white/5`}>
           <div className="flex items-center gap-2 border-b border-white/5 px-3 py-2">
             <span className="hidden shrink-0 text-[13px] font-medium xl:inline">Transcript</span>
             <input
