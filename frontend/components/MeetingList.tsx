@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { DeleteMeetingDialog, EditMeetingModal } from "@/components/CreateMeetingModal";
 import { api } from "@/lib/api";
 import { avatarColor, formatClock, formatDate, formatDuration, formatTimeOfDay, initials } from "@/lib/formatTime";
 import type { MeetingCard, MeetingDetail } from "@/lib/types";
@@ -19,8 +20,8 @@ export function MeetingList({
   onChanged: () => void;
 }) {
   const [menuId, setMenuId] = useState<number | null>(null);
-  const [renameId, setRenameId] = useState<number | null>(null);
-  const [renameValue, setRenameValue] = useState("");
+  const [editingMeeting, setEditingMeeting] = useState<MeetingCard | null>(null);
+  const [deletingMeeting, setDeletingMeeting] = useState<MeetingCard | null>(null);
 
   if (meetings.length === 0) {
     return (
@@ -44,33 +45,13 @@ export function MeetingList({
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#6d4aff] text-xs font-semibold text-white">
               {initials(host).slice(0, 1)}
             </span>
-            <span className="min-w-0 flex-1">
-              {renameId === meeting.id ? (
-                <input
-                  value={renameValue}
-                  autoFocus
-                  onChange={(event) => setRenameValue(event.target.value)}
-                  onKeyDown={async (event) => {
-                    if (event.key !== "Enter") return;
-                    await api(`/meetings/${meeting.id}`, {
-                      method: "PATCH",
-                      body: JSON.stringify({ title: renameValue.trim() }),
-                    });
-                    setRenameId(null);
-                    onChanged();
-                  }}
-                  className="w-full rounded-md border border-[#6d4aff] bg-[#121214] px-2 py-1 text-sm font-medium outline-none"
-                />
-              ) : (
-                <Link href={`/meetings/${meeting.id}`} className="block min-w-0">
-                  <span className="block truncate text-sm font-medium">{meeting.title}</span>
-                  <span className="mt-0.5 block truncate text-xs text-[#6b7080]">
-                    {formatDate(meeting.started_at)} · {formatTimeOfDay(meeting.started_at)} · {formatDuration(meeting.duration_seconds)}
-                    {meeting.participants.length > 0 ? ` · ${meeting.participants.map((person) => person.name).join(", ")}` : ""}
-                  </span>
-                </Link>
-              )}
-            </span>
+            <Link href={`/meetings/${meeting.id}`} className="block min-w-0 flex-1">
+              <span className="block truncate text-sm font-medium">{meeting.title}</span>
+              <span className="mt-0.5 block truncate text-xs text-[#6b7080]">
+                {formatDate(meeting.started_at)} · {formatTimeOfDay(meeting.started_at)} · {formatDuration(meeting.duration_seconds)}
+                {meeting.participants.length > 0 ? ` · ${meeting.participants.map((person) => person.name).join(", ")}` : ""}
+              </span>
+            </Link>
             <span className="hidden items-center -space-x-2 sm:flex">
               {meeting.participants.slice(0, 4).map((person) => (
                 <span
@@ -98,11 +79,10 @@ export function MeetingList({
                   className="block w-full px-3 py-2 text-left hover:bg-white/5"
                   onClick={() => {
                     setMenuId(null);
-                    setRenameId(meeting.id);
-                    setRenameValue(meeting.title);
+                    setEditingMeeting(meeting);
                   }}
                 >
-                  Rename
+                  Edit
                 </button>
                 <button
                   type="button"
@@ -117,10 +97,9 @@ export function MeetingList({
                 <button
                   type="button"
                   className="block w-full px-3 py-2 text-left text-[#f87171] hover:bg-white/5"
-                  onClick={async () => {
+                  onClick={() => {
                     setMenuId(null);
-                    await api(`/meetings/${meeting.id}`, { method: "DELETE" });
-                    onChanged();
+                    setDeletingMeeting(meeting);
                   }}
                 >
                   Delete
@@ -130,6 +109,27 @@ export function MeetingList({
           </div>
         );
       })}
+      {editingMeeting ? (
+        <EditMeetingModal
+          meeting={editingMeeting}
+          onClose={() => setEditingMeeting(null)}
+          onSaved={() => {
+            setEditingMeeting(null);
+            onChanged();
+          }}
+        />
+      ) : null}
+      {deletingMeeting ? (
+        <DeleteMeetingDialog
+          title={deletingMeeting.title}
+          onClose={() => setDeletingMeeting(null)}
+          onConfirm={async () => {
+            await api(`/meetings/${deletingMeeting.id}`, { method: "DELETE" });
+            setDeletingMeeting(null);
+            onChanged();
+          }}
+        />
+      ) : null}
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { api } from "@/lib/api";
 import { fromDateTimeInput, toLocalInput } from "@/lib/formatTime";
-import type { MeetingDetail } from "@/lib/types";
+import type { MeetingCard, MeetingDetail } from "@/lib/types";
 import { ParticipantField } from "@/components/ParticipantField";
 
 const HINT =
@@ -135,12 +135,11 @@ export function EditMeetingModal({
   onClose,
   onSaved,
 }: {
-  meeting: MeetingDetail;
+  meeting: MeetingCard;
   onClose: () => void;
   onSaved: (meeting: MeetingDetail) => void;
 }) {
   const [title, setTitle] = useState(meeting.title);
-  const [when, setWhen] = useState(toLocalInput(meeting.started_at));
   const [names, setNames] = useState(meeting.participants.map((person) => person.name));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -155,7 +154,6 @@ export function EditMeetingModal({
           method: "PATCH",
           body: JSON.stringify({
             title: title.trim(),
-            started_at: fromDateTimeInput(when),
             participant_names: names,
           }),
         }),
@@ -174,9 +172,6 @@ export function EditMeetingModal({
       <form onSubmit={submit} className="flex flex-col gap-4">
         <Field label="Title">
           <input required value={title} onChange={(event) => setTitle(event.target.value)} className={inputClass} />
-        </Field>
-        <Field label="Date">
-          <input required type="datetime-local" value={when} onChange={(event) => setWhen(event.target.value)} className={inputClass} />
         </Field>
         <ParticipantField names={names} onChange={setNames} />
         {error ? <p className="text-sm text-[#f87171]">{error}</p> : null}
@@ -203,13 +198,17 @@ export function DeleteMeetingDialog({
   onConfirm: () => Promise<void>;
 }) {
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   return (
-    <Modal title="Delete meeting" onClose={onClose}>
+    <Modal title="Delete meeting" onClose={() => {
+      if (!saving) onClose();
+    }}>
       <p className="text-sm text-[#d4d4d8]">
         Delete “{title}” and its transcript, summary, topics, and action items?
       </p>
+      {error ? <p className="mt-3 text-sm text-[#f87171]">{error}</p> : null}
       <div className="mt-5 flex justify-end gap-2">
-        <button type="button" onClick={onClose} className="rounded-lg px-3 py-2 text-sm text-[#d4d4d8] hover:bg-white/5">
+        <button type="button" disabled={saving} onClick={onClose} className="rounded-lg px-3 py-2 text-sm text-[#d4d4d8] hover:bg-white/5 disabled:opacity-60">
           Cancel
         </button>
         <button
@@ -217,7 +216,13 @@ export function DeleteMeetingDialog({
           disabled={saving}
           onClick={async () => {
             setSaving(true);
-            await onConfirm();
+            setError("");
+            try {
+              await onConfirm();
+            } catch (err) {
+              setError(err instanceof Error ? err.message : "Could not delete the meeting");
+              setSaving(false);
+            }
           }}
           className="rounded-lg bg-[#b42318] px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
         >
