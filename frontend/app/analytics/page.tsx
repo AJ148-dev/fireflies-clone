@@ -1,11 +1,10 @@
 "use client";
 
-import { useToast } from "@/components/Toast";
+import Link from "next/link";
 
 const ROWS = ["Acme discovery", "Q4 roadmap", "Sprint retro", "Design critique", "Pipeline review", "Customer sync"];
 
 export default function AnalyticsPage() {
-  const toast = useToast();
 
   return (
     <div className="relative h-full overflow-hidden bg-[#121214]">
@@ -33,13 +32,9 @@ export default function AnalyticsPage() {
           <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#3a2a10] text-xl text-[#f5c14a]">★</span>
           <h1 className="mt-5 text-2xl font-semibold leading-snug">Unlock Deal Intelligence & Team Analytics</h1>
           <p className="mt-3 text-sm text-[#a1a1aa]">Upgrade to business plan or above to access it.</p>
-          <button
-            type="button"
-            onClick={() => toast("Upgrade is coming soon")}
-            className="mt-6 rounded-lg bg-[#6d4aff] px-5 py-2 text-sm font-medium"
-          >
+          <Link href="/upgrade" className="mt-6 inline-block rounded-lg bg-[#6d4aff] px-5 py-2 text-sm font-medium">
             Upgrade now
-          </button>
+          </Link>
         </div>
       </div>
     </div>

@@ -35,15 +35,15 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const narrow = pathname.startsWith("/meetings") || pathname.startsWith("/upgrade") || pathname.startsWith("/ask");
   const collapsed = narrow || !expanded;
-  const pageLabel = pathname === "/ask" ? "AskFred" : pathname.startsWith("/meetings") ? "Meetings" : pathname.startsWith("/tasks") ? "Tasks" : pathname.startsWith("/analytics") ? "Analytics" : pathname.startsWith("/upgrade") ? "Upgrade" : pathname === "/settings" ? "Settings" : "Home";
+  const pageLabel = pathname === "/ask" ? "AskFred" : pathname.startsWith("/meetings") ? "Meetings" : pathname.startsWith("/tasks") ? "Tasks" : pathname.startsWith("/analytics") ? "Analytics" : pathname.startsWith("/upgrade") ? "Plan" : pathname === "/settings" ? "Settings" : "Home";
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#121214] text-[#f4f4f5]">
       <div className="bg-[#3a246b] py-1.5 text-center text-[12px] text-[#f3e8ff]">
         You are eligible for 7 days business plan free trial.{" "}
-        <button type="button" className="font-medium underline" onClick={() => toast("Upgrade is coming soon")}>
+        <Link href="/upgrade" className="font-medium underline">
           Start free trial
-        </button>
+        </Link>
       </div>
       <div className="flex min-h-0 flex-1">
         <aside className={`relative flex shrink-0 flex-col border-r border-white/5 bg-[#17171a] ${collapsed ? "w-14 items-center py-2" : "w-[232px]"}`}>
@@ -68,9 +68,9 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
                   <span className="hidden items-center gap-1.5 text-xs text-[#86efac] lg:flex">
                     <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e]" />3 Free meetings
                   </span>
-                  <button type="button" onClick={() => toast("Upgrade is coming soon")} className="rounded-md border border-[#166534] px-2 py-1 text-xs text-[#86efac]">
+                  <Link href="/upgrade" className="rounded-md border border-[#166534] px-2 py-1 text-xs text-[#86efac]">
                     Upgrade
-                  </button>
+                  </Link>
                 </>
               ) : null}
               <button type="button" aria-label="Notifications" onClick={() => toast("No new notifications")} className="text-[#a1a1aa]">
