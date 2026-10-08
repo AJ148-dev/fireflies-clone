@@ -47,10 +47,6 @@ export function MeetingView() {
       .catch(() => setMissing(true));
   }, [params.id]);
 
-  useEffect(() => {
-    setMatchCursor(0);
-  }, [query]);
-
   if (missing) {
     return <p className="p-8 text-sm text-[#6b7080]">This meeting is gone.</p>;
   }
@@ -232,7 +228,10 @@ export function MeetingView() {
             <div className="flex items-center gap-2 border-b border-white/5 px-3 py-2">
               <input
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setMatchCursor(0);
+                }}
                 placeholder="Find"
                 className="w-[180px] rounded-md border border-white/10 bg-[#1c1c20] px-2.5 py-1 text-[13px] outline-none focus:border-[#6d4aff]"
               />

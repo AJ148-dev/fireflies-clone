@@ -37,13 +37,16 @@ export function Transcript({
     return <p className="px-6 py-10 text-sm text-[#6b7080]">This meeting has no transcript yet.</p>;
   }
 
-  let matchIndex = 0;
+  const starts: number[] = [];
+  segments.reduce((total, segment) => {
+    starts.push(total);
+    return total + matchesIn(segment.text, needle);
+  }, 0);
   return (
     <div className="flex flex-col">
       {segments.map((segment, index) => {
         const active = index === activeIndex;
-        const startIndex = matchIndex;
-        matchIndex += matchesIn(segment.text, needle);
+        const startIndex = starts[index];
         return (
           <button
             key={segment.id}

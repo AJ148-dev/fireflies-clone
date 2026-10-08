@@ -77,7 +77,7 @@ export function Player({
       </button>
       <span className="w-10 text-xs tabular-nums text-[#6b7080]">{formatClock(time)}</span>
       <div className="relative flex h-8 flex-1 items-center">
-        <div className="pointer-events-none absolute inset-x-0 flex h-6 items-center gap-px overflow-hidden" aria-hidden="true">
+        <div className="pointer-events-none absolute inset-x-0 flex h-6 items-center justify-between overflow-hidden" aria-hidden="true">
           {Array.from({ length: 80 }, (_, index) => (
             <span
               key={index}
