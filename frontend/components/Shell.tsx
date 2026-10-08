@@ -64,9 +64,8 @@ function ShellFrame({ children }: { children: React.ReactNode }) {
               <button type="button" aria-label="Notifications" onClick={() => toast("No new notifications")} className="text-ff-text-secondary hover:text-ff-text">
                 <Icon name="bell" />
               </button>
-              <Link href="/?upload=1" aria-label="Capture" className="flex items-center gap-1.5 rounded-lg bg-[#6d4aff] px-3 py-1.5 text-sm font-medium text-on-accent">
-                {!collapsed ? "Capture" : "+"}
-                {!collapsed ? <span className="text-[10px] opacity-80">▾</span> : null}
+              <Link href="/?upload=1" className="flex items-center whitespace-nowrap rounded-lg bg-[#6d4aff] px-3 py-1.5 text-sm font-medium text-on-accent">
+                Create meeting
               </Link>
             </div>
           </header>
