@@ -10,12 +10,18 @@ SCALER_TITLE = "How the Scaler ecosystem is going global"
 
 def ensure_meeting_columns(engine: Engine) -> None:
     inspector = inspect(engine)
-    if "meetings" not in inspector.get_table_names():
+    tables = inspector.get_table_names()
+    if "meetings" not in tables:
         return
     columns = {column["name"] for column in inspector.get_columns("meetings")}
     if "youtube_video_id" not in columns:
         with engine.begin() as conn:
             conn.execute(text("ALTER TABLE meetings ADD COLUMN youtube_video_id VARCHAR(20)"))
+    if "action_items" in tables:
+        columns = {column["name"] for column in inspector.get_columns("action_items")}
+        if "owner" not in columns:
+            with engine.begin() as conn:
+                conn.execute(text("ALTER TABLE action_items ADD COLUMN owner VARCHAR(120)"))
 
 
 def backfill_youtube_video_ids(db: Session) -> None:

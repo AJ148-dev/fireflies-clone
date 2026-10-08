@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import configure
 from app.models import Base
-from app.routers import action_items, meetings
+from app.routers import action_items, comments, meetings, questions
 from app.migrate import backfill_youtube_video_ids, ensure_meeting_columns
 from app.scaler_transcript import resync_scaler_transcripts
 from app.seed import seed_if_empty
@@ -44,6 +44,8 @@ app.add_middleware(
 )
 app.include_router(meetings.router, prefix="/api")
 app.include_router(action_items.router, prefix="/api")
+app.include_router(comments.router, prefix="/api")
+app.include_router(questions.router, prefix="/api")
 
 
 @app.get("/api/health")

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { formatClock } from "@/lib/formatTime";
-import type { Segment } from "@/lib/types";
+import { api } from "@/lib/api";
+import { avatarColor, formatClock } from "@/lib/formatTime";
+import type { Segment, SegmentComment } from "@/lib/types";
 
 export function Transcript({
   segments,
@@ -12,6 +13,9 @@ export function Transcript({
   matchCursor,
   followSearch,
   onSeek,
+  onComments,
+  onHighlight,
+  onError,
 }: {
   segments: Segment[];
   activeIndex: number;
@@ -19,6 +23,9 @@ export function Transcript({
   matchCursor: number;
   followSearch: boolean;
   onSeek: (seconds: number) => void;
+  onComments: (segmentId: number, comments: SegmentComment[]) => void;
+  onHighlight: (segmentId: number, highlighted: boolean) => void;
+  onError: (message: string) => void;
 }) {
   const rowRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const needle = query.trim().toLowerCase();
@@ -48,22 +55,22 @@ export function Transcript({
         const active = index === activeIndex;
         const startIndex = starts[index];
         return (
-          <button
-            key={segment.id}
-            type="button"
-            ref={(node) => {
-              rowRefs.current[index] = node;
-            }}
-            onClick={() => onSeek(segment.start_seconds)}
-            className={`flex gap-3 px-3 py-2 text-left ${active ? "bg-ff-transcript-active" : "hover-ff"}`}
-          >
-            <span className="w-10 shrink-0 pt-0.5 text-xs tabular-nums text-ff-text-muted">{formatClock(segment.start_seconds)}</span>
-            <span
-              className="min-w-0 border-l-2 pl-3"
-              style={{ borderColor: active ? "#6d4aff" : "var(--ff-transcript-border)" }}
+          <div key={segment.id} className={`group relative px-4 py-3 ${active ? "bg-ff-transcript-active" : "hover-ff"}`}>
+            <button
+              type="button"
+              ref={(node) => {
+                rowRefs.current[index] = node;
+              }}
+              onClick={() => onSeek(segment.start_seconds)}
+              className="block w-full text-left"
             >
-              <span className="block text-xs font-semibold text-ff-text-secondary">{segment.speaker_name}</span>
-              <span className="mt-0.5 block text-[13px] leading-5 text-ff-text-secondary">
+              <span className="flex items-baseline gap-2">
+                <span className="text-[11px] tabular-nums text-ff-text-muted">{formatClock(segment.start_seconds)}</span>
+                <span className="text-[13px] font-semibold" style={{ color: avatarColor(segment.speaker_name) }}>
+                  {segment.speaker_name}
+                </span>
+              </span>
+              <span className={`mt-1 block text-sm leading-6 text-ff-text ${segment.highlighted ? "rounded-md bg-[#f5c14a]/30 px-1.5" : ""}`}>
                 <Highlight
                   text={segment.text}
                   needle={needle}
@@ -71,10 +78,128 @@ export function Transcript({
                   activeMatch={followSearch ? matchCursor : -1}
                 />
               </span>
-            </span>
-          </button>
+            </button>
+            <CommentList
+              segmentId={segment.id}
+              comments={segment.comments ?? []}
+              highlighted={Boolean(segment.highlighted)}
+              onComments={onComments}
+              onHighlight={onHighlight}
+              onError={onError}
+            />
+          </div>
         );
       })}
+    </div>
+  );
+}
+
+function CommentList({
+  segmentId,
+  comments,
+  highlighted,
+  onComments,
+  onHighlight,
+  onError,
+}: {
+  segmentId: number;
+  comments: SegmentComment[];
+  highlighted: boolean;
+  onComments: (segmentId: number, comments: SegmentComment[]) => void;
+  onHighlight: (segmentId: number, highlighted: boolean) => void;
+  onError: (message: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function addComment() {
+    const body = draft.trim();
+    if (!body || saving) return;
+    setSaving(true);
+    try {
+      const created = await api<SegmentComment>(`/segments/${segmentId}/comments`, {
+        method: "POST",
+        body: JSON.stringify({ body }),
+      });
+      onComments(segmentId, [...comments, created]);
+      setDraft("");
+      setOpen(false);
+    } catch (err) {
+      onError(err instanceof Error ? err.message : "Could not save the comment");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function removeComment(commentId: number) {
+    try {
+      await api(`/comments/${commentId}`, { method: "DELETE" });
+      onComments(segmentId, comments.filter((comment) => comment.id !== commentId));
+    } catch (err) {
+      onError(err instanceof Error ? err.message : "Could not delete the comment");
+    }
+  }
+
+  async function toggleHighlight() {
+    try {
+      if (highlighted) {
+        await api(`/segments/${segmentId}/highlight`, { method: "DELETE" });
+        onHighlight(segmentId, false);
+      } else {
+        await api(`/segments/${segmentId}/highlight`, { method: "PUT" });
+        onHighlight(segmentId, true);
+      }
+    } catch (err) {
+      onError(err instanceof Error ? err.message : "Could not update the highlight");
+    }
+  }
+
+  const actionsVisible = open || comments.length > 0 || highlighted;
+
+  return (
+    <div>
+      {comments.length > 0 ? (
+        <div className="mt-1.5">
+          {comments.map((comment) => (
+            <p key={comment.id} className="mb-1 flex items-start gap-2 text-[12px] leading-5 text-ff-text">
+              <span className="min-w-0 flex-1 rounded-md bg-ff-elevated px-2 py-1">{comment.body}</span>
+              <button type="button" onClick={() => removeComment(comment.id)} className="shrink-0 text-ff-text-muted hover:text-ff-text" aria-label="Delete comment">
+                ×
+              </button>
+            </p>
+          ))}
+        </div>
+      ) : null}
+      {open ? (
+        <form
+          className="mt-1.5 flex gap-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void addComment();
+          }}
+        >
+          <input
+            value={draft}
+            autoFocus
+            onChange={(event) => setDraft(event.target.value)}
+            placeholder="Add a comment"
+            className="min-w-0 flex-1 rounded-md border border-ff-strong bg-ff-elevated px-2 py-1 text-[12px] text-ff-text outline-none focus:border-[#6d4aff]"
+          />
+          <button type="submit" disabled={saving || !draft.trim()} className="text-[12px] font-medium text-[#c4b5fd] disabled:text-ff-text-faint">
+            Save
+          </button>
+        </form>
+      ) : (
+        <span className={`absolute right-3 top-2.5 flex gap-3 rounded-md bg-ff-bg/90 px-1 ${actionsVisible ? "" : "pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100"}`}>
+          <button type="button" onClick={() => setOpen(true)} className="text-[11px] font-medium text-ff-text-muted hover:text-ff-text">
+            {comments.length > 0 ? "Add comment" : "Comment"}
+          </button>
+          <button type="button" onClick={() => void toggleHighlight()} className={`text-[11px] font-medium ${highlighted ? "text-[#f5c14a]" : "text-ff-text-muted hover:text-ff-text"}`}>
+            {highlighted ? "Highlighted" : "Highlight"}
+          </button>
+        </span>
+      )}
     </div>
   );
 }

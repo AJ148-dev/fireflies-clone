@@ -242,3 +242,37 @@ def test_gemini_failure_still_saves_the_meeting(client, monkeypatch):
     assert created["notes_status"] == "failed"
     assert created["summary"] is None
     assert created["segments"][0]["text"] == "Hello there"
+
+
+def test_segment_comment_persists_and_deletes(client):
+    created = _meeting(client)
+    segment_id = created["segments"][0]["id"]
+    assert created["segments"][0]["comments"] == []
+    added = client.post(f"/api/segments/{segment_id}/comments", json={"body": "  Check the date.  "})
+    assert added.status_code == 201
+    comment_id = added.json()["id"]
+    assert added.json()["body"] == "Check the date."
+    again = client.get(f"/api/meetings/{created['id']}").json()
+    assert again["segments"][0]["comments"] == [{"id": comment_id, "body": "Check the date."}]
+    assert client.post(f"/api/segments/{segment_id}/comments", json={"body": "   "}).status_code == 422
+    assert client.post("/api/segments/999/comments", json={"body": "Missing"}).status_code == 404
+    assert client.delete(f"/api/comments/{comment_id}").status_code == 204
+    assert client.delete(f"/api/comments/{comment_id}").status_code == 404
+    cleared = client.get(f"/api/meetings/{created['id']}").json()
+    assert cleared["segments"][0]["comments"] == []
+
+
+def test_segment_highlight_toggles(client):
+    created = _meeting(client)
+    segment_id = created["segments"][0]["id"]
+    assert created["segments"][0]["highlighted"] is False
+    marked = client.put(f"/api/segments/{segment_id}/highlight")
+    assert marked.status_code == 200
+    assert marked.json()["highlighted"] is True
+    again = client.get(f"/api/meetings/{created['id']}").json()
+    assert again["segments"][0]["highlighted"] is True
+    assert client.put(f"/api/segments/{segment_id}/highlight").status_code == 200
+    assert client.delete(f"/api/segments/{segment_id}/highlight").status_code == 204
+    assert client.put("/api/segments/999/highlight").status_code == 404
+    cleared = client.get(f"/api/meetings/{created['id']}").json()
+    assert cleared["segments"][0]["highlighted"] is False

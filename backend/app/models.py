@@ -59,6 +59,11 @@ class Meeting(Base):
         cascade="all, delete-orphan",
         order_by="ActionItem.position",
     )
+    questions = relationship(
+        "MeetingQuestion",
+        cascade="all, delete-orphan",
+        order_by="MeetingQuestion.id",
+    )
 
 
 class MeetingParticipant(Base):
@@ -88,6 +93,36 @@ class TranscriptSegment(Base):
     position = Column(Integer, nullable=False)
 
     meeting = relationship("Meeting", back_populates="segments")
+    comments = relationship(
+        "SegmentComment",
+        cascade="all, delete-orphan",
+        order_by="SegmentComment.id",
+    )
+    highlight = relationship(
+        "SegmentHighlight",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
+
+
+class SegmentComment(Base):
+    __tablename__ = "segment_comments"
+
+    id = Column(Integer, primary_key=True)
+    segment_id = Column(ForeignKey("transcript_segments.id", ondelete="CASCADE"), nullable=False, index=True)
+    body = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+
+    segment = relationship("TranscriptSegment", back_populates="comments")
+
+
+class SegmentHighlight(Base):
+    __tablename__ = "segment_highlights"
+
+    id = Column(Integer, primary_key=True)
+    segment_id = Column(ForeignKey("transcript_segments.id", ondelete="CASCADE"), nullable=False, unique=True)
+
+    segment = relationship("TranscriptSegment", back_populates="highlight")
 
 
 class Summary(Base):
@@ -119,7 +154,21 @@ class ActionItem(Base):
     id = Column(Integer, primary_key=True)
     meeting_id = Column(ForeignKey("meetings.id", ondelete="CASCADE"), nullable=False)
     text = Column(Text, nullable=False)
+    owner = Column(String(120), nullable=True)
     is_done = Column(Boolean, nullable=False, default=False)
     position = Column(Integer, nullable=False)
 
     meeting = relationship("Meeting", back_populates="action_items")
+
+
+class MeetingQuestion(Base):
+    __tablename__ = "meeting_questions"
+
+    id = Column(Integer, primary_key=True)
+    meeting_id = Column(ForeignKey("meetings.id", ondelete="CASCADE"), nullable=False, index=True)
+    question = Column(Text, nullable=False)
+    answer = Column(Text, nullable=False)
+    provider = Column(String(20), nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+
+    meeting = relationship("Meeting", back_populates="questions")

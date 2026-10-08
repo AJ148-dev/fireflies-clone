@@ -9,6 +9,7 @@ export type MeetingCard = {
   snippet?: string;
 };
 
+export type SegmentComment = { id: number; body: string };
 
 export type Segment = {
   id: number;
@@ -17,11 +18,14 @@ export type Segment = {
   end_seconds: number | null;
   text: string;
   position: number;
+  comments?: SegmentComment[];
+  highlighted?: boolean;
 };
 
 export type ActionItem = {
   id: number;
   text: string;
+  owner?: string | null;
   is_done: boolean;
   position: number;
 };

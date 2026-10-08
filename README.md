@@ -80,6 +80,14 @@ Deleting a meeting deletes its segments, summary, topics, action items, and part
 | POST | `/api/meetings/{id}/action-items` | Add an action item |
 | PATCH | `/api/action-items/{id}` | Edit text or completion |
 | DELETE | `/api/action-items/{id}` | Remove an action item |
+| POST | `/api/segments/{id}/comments` | Add a comment on a transcript line |
+| DELETE | `/api/comments/{id}` | Remove a transcript comment |
+| PUT | `/api/segments/{id}/highlight` | Highlight a transcript line |
+| DELETE | `/api/segments/{id}/highlight` | Remove that highlight |
+| GET | `/api/meetings/{id}/questions` | Past questions and answers for a meeting |
+| POST | `/api/meetings/{id}/questions` | Ask a question about the meeting's transcript |
+
+Asking a question sends the meeting's transcript and the question to Groq, then to Gemini if Groq fails. Transcripts over 20,000 characters go straight to Gemini. Each question stands alone, with no chat memory. Answers cite transcript times like `[02:15]`, and those times seek the player. Only successful answers are saved. A missing key returns 503, and a failed model call returns 502.
 
 Accepted transcript shapes:
 

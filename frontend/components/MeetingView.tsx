@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { DeleteMeetingDialog, EditMeetingModal } from "@/components/CreateMeetingModal";
 import { ExportMenu } from "@/components/ExportMenu";
+import { MeetingAsk } from "@/components/MeetingAsk";
 import { Player, type PlayerHandle } from "@/components/Player";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { SummaryRail } from "@/components/SummaryRail";
@@ -199,21 +200,40 @@ export function MeetingView() {
                   matchCursor={matchCursor}
                   followSearch={Boolean(query.trim())}
                   onSeek={(seconds) => playerRef.current?.seek(seconds)}
+                  onComments={(segmentId, comments) => {
+                    setMeeting((current) =>
+                      current
+                        ? {
+                            ...current,
+                            segments: current.segments.map((segment) =>
+                              segment.id === segmentId ? { ...segment, comments } : segment,
+                            ),
+                          }
+                        : current,
+                    );
+                  }}
+                  onHighlight={(segmentId, highlighted) => {
+                    setMeeting((current) =>
+                      current
+                        ? {
+                            ...current,
+                            segments: current.segments.map((segment) =>
+                              segment.id === segmentId ? { ...segment, highlighted } : segment,
+                            ),
+                          }
+                        : current,
+                    );
+                  }}
+                  onError={(message) => toast(message, "err")}
                 />
               </div>
             </>
           ) : (
-            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4">
-              <p className="text-sm text-ff-text-secondary">
-                Ask questions about this meeting. Full chat lives on the AskFred page for now.
-              </p>
-              <Link
-                href="/ask"
-                className="mt-4 inline-flex w-fit rounded-lg bg-[#6d4aff] px-4 py-2 text-[13px] font-medium text-on-accent"
-              >
-                Open AskFred
-              </Link>
-            </div>
+            <MeetingAsk
+              meetingId={meeting.id}
+              onSeek={(seconds) => playerRef.current?.seek(seconds)}
+              onError={(message) => toast(message, "err")}
+            />
           )}
         </aside>
       </div>

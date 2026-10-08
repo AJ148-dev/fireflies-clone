@@ -4,16 +4,20 @@ import re
 
 import httpx
 
+from app.services.transcript_parser import parse_transcript
+
 _FENCE = re.compile(r"^```(?:json)?\s*|\s*```$", re.IGNORECASE)
 
 PROMPT = """You write meeting notes from a transcript. Return only JSON with this shape:
-{"summary":"...","topics":[{"title":"...","start_seconds":0}],"action_items":[{"text":"..."}]}
+{"summary":"...","topics":[{"title":"...","start_seconds":0}],"action_items":[{"text":"...","owner":"..."}]}
 Rules:
 - Use only facts stated in the transcript.
 - Do not invent owners, deadlines, or decisions.
 - summary is one short paragraph.
-- topics are 1 to 6 chapter titles. start_seconds is a number from the transcript, or null.
+- topics are chapter titles for distinct parts of the discussion, at most one per minute of transcript and never more than 6. A short meeting may have only 1 or 2. start_seconds is a number from the transcript, or null.
 - action_items are concrete tasks the transcript states. If none, use an empty list.
+- Write each action item so it reads on its own: replace pronouns like "it", "her", or "that" with what they refer to in the transcript, and keep any stated deadline.
+- owner is the exact speaker name of the person who committed to the task. If nobody clearly committed, use null.
 
 Transcript:
 """
@@ -41,7 +45,25 @@ def apply_generated_notes(payload: dict) -> tuple[dict, str]:
     notes = generate_notes(transcript)
     if notes is None:
         return payload, "failed"
+    notes["action_items"] = keep_known_owners(notes["action_items"], _speakers(transcript, payload.get("transcript_format")))
     return {**payload, **notes}, "generated"
+
+
+def keep_known_owners(items: list[dict], speakers: set[str]) -> list[dict]:
+    by_lower = {name.lower(): name for name in speakers}
+    kept = []
+    for item in items:
+        owner = by_lower.get((item.get("owner") or "").strip().lower())
+        kept.append({**item, "owner": owner})
+    return kept
+
+
+def _speakers(transcript: str, fmt: str | None) -> set[str]:
+    try:
+        segments = parse_transcript(transcript, fmt or "")
+    except ValueError:
+        return set()
+    return {segment["speaker_name"] for segment in segments if segment.get("speaker_name")}
 
 
 def _has_model_key() -> bool:
@@ -157,7 +179,8 @@ def _actions(value) -> list[dict]:
         text = item.get("text") if isinstance(item, dict) else None
         if not isinstance(text, str) or not text.strip():
             continue
-        actions.append({"text": text.strip()})
+        owner = item.get("owner")
+        actions.append({"text": text.strip(), "owner": owner.strip() if isinstance(owner, str) and owner.strip() else None})
         if len(actions) == 12:
             break
     return actions

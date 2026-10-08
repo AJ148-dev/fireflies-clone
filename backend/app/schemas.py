@@ -19,6 +19,7 @@ class TopicIn(BaseModel):
 
 class ActionIn(BaseModel):
     text: str = Field(min_length=1)
+    owner: str | None = Field(default=None, max_length=120)
     is_done: bool = False
 
     @field_validator("text")
@@ -70,6 +71,30 @@ class MeetingUpdate(BaseModel):
         value = value.strip()
         if not value:
             raise ValueError("meeting title cannot be blank")
+        return value
+
+
+class CommentCreate(BaseModel):
+    body: str = Field(min_length=1)
+
+    @field_validator("body")
+    @classmethod
+    def body_must_have_text(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("comment cannot be blank")
+        return value
+
+
+class QuestionCreate(BaseModel):
+    question: str = Field(min_length=1, max_length=1000)
+
+    @field_validator("question")
+    @classmethod
+    def question_must_have_text(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("question cannot be blank")
         return value
 
 

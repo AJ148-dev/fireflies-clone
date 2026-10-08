@@ -27,7 +27,7 @@ export function summaryText(meeting: MeetingDetail) {
   lines.push("", "Action items");
   if (meeting.action_items.length === 0) lines.push("No action items.");
   for (const item of meeting.action_items) {
-    lines.push(`- [${item.is_done ? "x" : " "}] ${item.text}`);
+    lines.push(`- [${item.is_done ? "x" : " "}] ${item.text}${item.owner ? ` (${item.owner})` : ""}`);
   }
   return `${lines.join("\n")}\n`;
 }
@@ -42,7 +42,7 @@ export function summaryMarkdown(meeting: MeetingDetail) {
   lines.push("", "## Action items", "");
   if (meeting.action_items.length === 0) lines.push("No action items.");
   for (const item of meeting.action_items) {
-    lines.push(`- [${item.is_done ? "x" : " "}] ${item.text}`);
+    lines.push(`- [${item.is_done ? "x" : " "}] ${item.text}${item.owner ? ` (${item.owner})` : ""}`);
   }
   return `${lines.join("\n")}\n`;
 }

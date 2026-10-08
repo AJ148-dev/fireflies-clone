@@ -41,7 +41,8 @@ def get_or_create_user(db: Session) -> User:
 def meeting_query():
     return select(Meeting).options(
         selectinload(Meeting.links).selectinload(MeetingParticipant.participant),
-        selectinload(Meeting.segments),
+        selectinload(Meeting.segments).selectinload(TranscriptSegment.comments),
+        selectinload(Meeting.segments).selectinload(TranscriptSegment.highlight),
         selectinload(Meeting.summary),
         selectinload(Meeting.topics),
         selectinload(Meeting.action_items),
@@ -144,7 +145,12 @@ def add_children(
         )
     for position, item in enumerate(action_items):
         meeting.action_items.append(
-            ActionItem(text=item["text"].strip(), is_done=bool(item.get("is_done", False)), position=position)
+            ActionItem(
+                text=item["text"].strip(),
+                owner=(item.get("owner") or "").strip() or None,
+                is_done=bool(item.get("is_done", False)),
+                position=position,
+            )
         )
 
 
@@ -278,6 +284,7 @@ def detail_payload(meeting: Meeting) -> dict:
             {
                 "id": item.id,
                 "text": item.text,
+                "owner": item.owner,
                 "is_done": item.is_done,
                 "position": item.position,
             }
@@ -291,6 +298,8 @@ def detail_payload(meeting: Meeting) -> dict:
                 "end_seconds": segment.end_seconds,
                 "text": segment.text,
                 "position": segment.position,
+                "comments": [{"id": comment.id, "body": comment.body} for comment in segment.comments],
+                "highlighted": segment.highlight is not None,
             }
             for segment in meeting.segments
         ],

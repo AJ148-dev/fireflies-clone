@@ -51,7 +51,7 @@ export function SummaryRail({
   }
 
   const sections = noteSections(meeting);
-  const owner = meeting.participants[0]?.name ?? "Notes";
+  const groups = ownerGroups(meeting.action_items);
 
   return (
     <aside className="flex min-w-0 flex-col bg-ff-bg text-ff-text">
@@ -60,38 +60,42 @@ export function SummaryRail({
           <div className="flex items-center gap-2">
             <h2 className="text-[15px] font-semibold">Action items</h2>
           </div>
-          <p className="mt-1 text-[13px] font-medium text-ff-text">{owner}</p>
-          <ul className="mt-3 flex flex-col gap-2.5">
-            {meeting.action_items.length === 0 ? <li className="text-sm text-ff-text-muted">No action items yet.</li> : null}
-            {meeting.action_items.map((item) => (
-              <ActionRow
-                key={item.id}
-                item={item}
-                editing={editingId === item.id}
-                editingText={editingText}
-                onEdit={() => {
-                  setEditingId(item.id);
-                  setEditingText(item.text);
-                }}
-                onEditingText={setEditingText}
-                onToggle={() => run(() => api(`/action-items/${item.id}`, { method: "PATCH", body: JSON.stringify({ is_done: !item.is_done }) }))}
-                onSave={() => {
-                  if (!editingText.trim()) {
-                    onError("Action item text cannot be blank");
-                    return;
-                  }
-                  void run(async () => {
-                    await api(`/action-items/${item.id}`, {
-                      method: "PATCH",
-                      body: JSON.stringify({ text: editingText.trim() }),
-                    });
-                    setEditingId(null);
-                  });
-                }}
-                onDelete={() => run(() => api(`/action-items/${item.id}`, { method: "DELETE" }))}
-              />
-            ))}
-          </ul>
+          {meeting.action_items.length === 0 ? <p className="mt-3 text-sm text-ff-text-muted">No action items yet.</p> : null}
+          {groups.map((group) => (
+            <div key={group.owner ?? ""} className="mt-3">
+              {group.label ? <p className="text-[13px] font-medium text-ff-text">{group.label}</p> : null}
+              <ul className="mt-2 flex flex-col gap-2.5">
+                {group.items.map((item) => (
+                  <ActionRow
+                    key={item.id}
+                    item={item}
+                    editing={editingId === item.id}
+                    editingText={editingText}
+                    onEdit={() => {
+                      setEditingId(item.id);
+                      setEditingText(item.text);
+                    }}
+                    onEditingText={setEditingText}
+                    onToggle={() => run(() => api(`/action-items/${item.id}`, { method: "PATCH", body: JSON.stringify({ is_done: !item.is_done }) }))}
+                    onSave={() => {
+                      if (!editingText.trim()) {
+                        onError("Action item text cannot be blank");
+                        return;
+                      }
+                      void run(async () => {
+                        await api(`/action-items/${item.id}`, {
+                          method: "PATCH",
+                          body: JSON.stringify({ text: editingText.trim() }),
+                        });
+                        setEditingId(null);
+                      });
+                    }}
+                    onDelete={() => run(() => api(`/action-items/${item.id}`, { method: "DELETE" }))}
+                  />
+                ))}
+              </ul>
+            </div>
+          ))}
           <form
             className="mt-3 flex gap-2"
             onSubmit={(event) => {
@@ -172,6 +176,18 @@ function noteSections(meeting: MeetingDetail) {
       bullets: shown.map((segment) => ({ start: segment.start_seconds, text: segment.text })),
     };
   });
+}
+
+function ownerGroups(items: ActionItem[]) {
+  const groups = new Map<string | null, ActionItem[]>();
+  for (const item of items) {
+    const owner = item.owner || null;
+    groups.set(owner, [...(groups.get(owner) ?? []), item]);
+  }
+  const anyOwner = items.some((item) => item.owner);
+  return [...groups.entries()]
+    .sort(([a], [b]) => (a === null ? 1 : 0) - (b === null ? 1 : 0))
+    .map(([owner, grouped]) => ({ owner, label: owner ?? (anyOwner ? "Unassigned" : null), items: grouped }));
 }
 
 function formatStamp(seconds: number) {
