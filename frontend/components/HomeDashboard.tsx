@@ -9,6 +9,8 @@ import { useToast } from "@/components/Toast";
 import { api } from "@/lib/api";
 import type { MeetingCard, MeetingDetail } from "@/lib/types";
 
+const INTRO_VIDEO_ID = "uZuFXgNfZmI";
+
 export function HomeDashboard() {
   const params = useSearchParams();
   const router = useRouter();
@@ -20,6 +22,7 @@ export function HomeDashboard() {
   const [creating, setCreating] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [name, setName] = useState("Maya Chen");
+  const [playingIntro, setPlayingIntro] = useState(false);
 
   useEffect(() => {
     api<{ name: string }>("/me")
@@ -30,6 +33,15 @@ export function HomeDashboard() {
   useEffect(() => {
     if (params.get("upload") === "1") setCreating(true);
   }, [params]);
+
+  useEffect(() => {
+    if (!playingIntro) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setPlayingIntro(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [playingIntro]);
 
   useEffect(() => {
     const query = new URLSearchParams();
@@ -56,8 +68,16 @@ export function HomeDashboard() {
             Fireflies is now ready to automate your meetings and streamline your workflows.
           </p>
         </div>
-        <div className="home-hero-video hidden h-36 w-56 shrink-0 items-center justify-center rounded-xl border sm:flex">
-          <span className="home-hero-play grid h-10 w-10 place-items-center rounded-full">▶</span>
+        <div className="home-hero-video relative hidden h-36 w-56 shrink-0 overflow-hidden rounded-xl border sm:block">
+          <button
+            type="button"
+            onClick={() => setPlayingIntro(true)}
+            aria-label="Play intro video"
+            className="group absolute inset-0 grid place-items-center"
+          >
+            <img src={`https://i.ytimg.com/vi/${INTRO_VIDEO_ID}/hqdefault.jpg`} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            <span className="home-hero-play relative grid h-10 w-10 place-items-center rounded-full shadow-md transition-transform group-hover:scale-110">▶</span>
+          </button>
         </div>
       </section>
 
@@ -119,6 +139,35 @@ export function HomeDashboard() {
             router.push(`/meetings/${meeting.id}`);
           }}
         />
+      ) : null}
+      {playingIntro ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Fireflies intro video"
+          onClick={() => setPlayingIntro(false)}
+          className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-4"
+        >
+          <div onClick={(event) => event.stopPropagation()} className="relative w-full max-w-4xl">
+            <button
+              type="button"
+              onClick={() => setPlayingIntro(false)}
+              aria-label="Close video"
+              className="absolute -top-10 right-0 grid h-8 w-8 place-items-center rounded-full bg-white/15 text-lg text-white hover:bg-white/25"
+            >
+              ×
+            </button>
+            <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black shadow-2xl">
+              <iframe
+                src={`https://www.youtube.com/embed/${INTRO_VIDEO_ID}?autoplay=1&start=1&rel=0`}
+                title="Fireflies intro video"
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                allowFullScreen
+                className="absolute inset-0 h-full w-full"
+              />
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
   );
