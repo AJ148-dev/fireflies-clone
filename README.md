@@ -49,7 +49,7 @@ One detail request loads a meeting with its participants, transcript, summary, t
 
 The active transcript line is the last segment whose `start_seconds` is less than or equal to the player time. That rule lives in `frontend/lib/activeSegment.ts`. The page already has every line, so the playhead does not ask the server.
 
-A participant is a person on the meeting. A speaker label is text on a transcript line. Search in the library matches title or participant name. Search in the transcript runs on the loaded lines.
+A participant is a person on the meeting. A speaker label is text on a transcript line. Search matches a meeting title, participant, transcript line, summary, topic, or action item. Search inside one transcript runs on the loaded lines.
 
 There is one seeded user, Maya Chen. The API does not check a password. Settings and the extra nav items are placeholders.
 

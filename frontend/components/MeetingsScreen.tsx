@@ -112,7 +112,7 @@ export function MeetingsScreen() {
           <input
             aria-label="Search meetings"
             value={q}
-            placeholder="Search by title or participant"
+            placeholder="Search title, people, or words"
             onChange={(event) => update({ q: event.target.value })}
             className="min-w-[12rem] flex-1 rounded-lg border border-ff-strong bg-ff-elevated px-3 py-2 text-[13px] text-ff-text outline-none placeholder:text-ff-text-faint"
           />
@@ -130,6 +130,7 @@ export function MeetingsScreen() {
             <MeetingList
               meetings={meetings}
               filtered={Boolean(q || from || to)}
+              query={q}
               onClear={() => router.replace("/meetings")}
               onChanged={() => setReloadKey((key) => key + 1)}
             />

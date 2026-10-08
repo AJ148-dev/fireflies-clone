@@ -64,7 +64,20 @@ def list_meetings(db: Session, q: str | None, start, end, sort: str) -> list[Mee
             .join(Participant, Participant.id == MeetingParticipant.participant_id)
             .where(Participant.name.ilike(like))
         )
-        stmt = stmt.where(or_(Meeting.title.ilike(like), Meeting.id.in_(participant_match)))
+        segment_match = select(TranscriptSegment.meeting_id).where(TranscriptSegment.text.ilike(like))
+        summary_match = select(Summary.meeting_id).where(Summary.body.ilike(like))
+        topic_match = select(Topic.meeting_id).where(Topic.title.ilike(like))
+        action_match = select(ActionItem.meeting_id).where(ActionItem.text.ilike(like))
+        stmt = stmt.where(
+            or_(
+                Meeting.title.ilike(like),
+                Meeting.id.in_(participant_match),
+                Meeting.id.in_(segment_match),
+                Meeting.id.in_(summary_match),
+                Meeting.id.in_(topic_match),
+                Meeting.id.in_(action_match),
+            )
+        )
     if start is not None:
         stmt = stmt.where(Meeting.started_at >= datetime.combine(start, time.min, timezone.utc))
     if end is not None:
@@ -190,14 +203,60 @@ def participant_payload(meeting: Meeting) -> list[dict]:
     ]
 
 
-def card_payload(meeting: Meeting) -> dict:
-    return {
+def card_payload(meeting: Meeting, snippet: str | None = None) -> dict:
+    card = {
         "id": meeting.id,
         "title": meeting.title,
         "started_at": as_utc(meeting.started_at).isoformat(),
         "duration_seconds": meeting.duration_seconds,
         "participants": participant_payload(meeting),
     }
+    if snippet:
+        card["snippet"] = snippet
+    return card
+
+
+def _clip(text: str, needle: str) -> str:
+    clean = " ".join(text.split())
+    index = clean.casefold().find(needle.casefold())
+    limit = 140
+    if index < 0 or len(clean) <= limit:
+        return clean[:limit]
+    start = max(0, index - 40)
+    end = min(len(clean), start + limit)
+    prefix = "…" if start else ""
+    suffix = "…" if end < len(clean) else ""
+    return f"{prefix}{clean[start:end]}{suffix}"
+
+
+def search_snippets(db: Session, meeting_ids: list[int], needle: str) -> dict[int, str]:
+    if not meeting_ids or not needle.strip():
+        return {}
+    like = f"%{needle.strip()}%"
+    found: dict[int, str] = {}
+    segments = db.scalars(
+        select(TranscriptSegment)
+        .where(TranscriptSegment.meeting_id.in_(meeting_ids), TranscriptSegment.text.ilike(like))
+        .order_by(TranscriptSegment.meeting_id, TranscriptSegment.position)
+    )
+    for segment in segments:
+        found.setdefault(segment.meeting_id, _clip(f"{segment.speaker_name}: {segment.text}", needle))
+    remaining = [meeting_id for meeting_id in meeting_ids if meeting_id not in found]
+    if not remaining:
+        return found
+    for summary in db.scalars(select(Summary).where(Summary.meeting_id.in_(remaining), Summary.body.ilike(like))):
+        found.setdefault(summary.meeting_id, _clip(summary.body, needle))
+    remaining = [meeting_id for meeting_id in meeting_ids if meeting_id not in found]
+    if not remaining:
+        return found
+    for topic in db.scalars(select(Topic).where(Topic.meeting_id.in_(remaining), Topic.title.ilike(like))):
+        found.setdefault(topic.meeting_id, _clip(topic.title, needle))
+    remaining = [meeting_id for meeting_id in meeting_ids if meeting_id not in found]
+    if not remaining:
+        return found
+    for item in db.scalars(select(ActionItem).where(ActionItem.meeting_id.in_(remaining), ActionItem.text.ilike(like))):
+        found.setdefault(item.meeting_id, _clip(item.text, needle))
+    return found
 
 
 def detail_payload(meeting: Meeting) -> dict:

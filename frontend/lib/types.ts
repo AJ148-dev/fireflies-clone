@@ -6,7 +6,9 @@ export type MeetingCard = {
   started_at: string;
   duration_seconds: number;
   participants: Participant[];
+  snippet?: string;
 };
+
 
 export type Segment = {
   id: number;

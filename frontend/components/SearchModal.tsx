@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { HighlightText } from "@/components/HighlightText";
 import { api } from "@/lib/api";
 import { formatDate, formatTimeOfDay } from "@/lib/formatTime";
 import type { MeetingCard } from "@/lib/types";
@@ -44,7 +45,8 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
 
   function open(meeting: MeetingCard) {
     onClose();
-    router.push(`/meetings/${meeting.id}`);
+    const target = needle ? `/meetings/${meeting.id}?q=${encodeURIComponent(needle)}` : `/meetings/${meeting.id}`;
+    router.push(target);
   }
 
   function onKeyDown(event: React.KeyboardEvent) {
@@ -101,11 +103,23 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
                   onClick={() => open(meeting)}
                   className={`block w-full px-5 py-2.5 text-left ${index === cursor ? "bg-ff-active" : ""}`}
                 >
-                  <span className="block truncate text-sm font-medium">{meeting.title}</span>
+                  <span className="block truncate text-sm font-medium">
+                    <HighlightText text={meeting.title} needle={needle} />
+                  </span>
                   <span className="mt-0.5 block truncate text-xs text-ff-text-muted">
                     {formatDate(meeting.started_at)} · {formatTimeOfDay(meeting.started_at)}
-                    {meeting.participants.length > 0 ? ` · ${meeting.participants.map((person) => person.name).join(", ")}` : ""}
+                    {meeting.participants.length > 0 ? (
+                      <>
+                        {" · "}
+                        <HighlightText text={meeting.participants.map((person) => person.name).join(", ")} needle={needle} />
+                      </>
+                    ) : null}
                   </span>
+                  {meeting.snippet ? (
+                    <span className="mt-1 block truncate text-xs text-ff-text-secondary">
+                      <HighlightText text={meeting.snippet} needle={needle} />
+                    </span>
+                  ) : null}
                 </button>
               </li>
             ))}

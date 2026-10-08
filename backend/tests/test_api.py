@@ -112,6 +112,18 @@ def test_bad_upload_is_400(client):
     assert unsupported.status_code == 400
 
 
+def test_search_finds_words_across_meetings(client):
+    first = _meeting(client, title="Billing call", transcript_text="[00:04] Ava Shah: The checkout rewrite stays in October\n")
+    _meeting(client, title="Design critique", transcript_text="[00:04] Noah Kim: Move the palette review\n", summary="Palette notes")
+    found = client.get("/api/meetings", params={"q": "checkout"})
+    assert found.status_code == 200
+    body = found.json()
+    assert [item["title"] for item in body] == ["Billing call"]
+    assert "checkout" in body[0]["snippet"].lower()
+    assert body[0]["id"] == first["id"]
+    assert client.get("/api/meetings", params={"q": "palette"}).json()[0]["title"] == "Design critique"
+
+
 def test_library_filters_participant_and_date(client):
     _meeting(client)
     _meeting(

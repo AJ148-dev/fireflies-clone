@@ -39,6 +39,14 @@ export function MeetingView() {
       .then((data) => {
         setMeeting(data);
         setMissing(false);
+        const term = new URLSearchParams(window.location.search).get("q")?.trim() ?? "";
+        if (!term) return;
+        setQuery(term);
+        const lower = term.toLowerCase();
+        const inTranscript = data.segments.some(
+          (segment) => segment.text.toLowerCase().includes(lower) || segment.speaker_name.toLowerCase().includes(lower),
+        );
+        if (inTranscript) setPane("transcript");
       })
       .catch(() => setMissing(true));
   }, [params.id]);

@@ -12,6 +12,7 @@ from app.services.meetings import (
     detail_payload,
     get_meeting,
     list_meetings,
+    search_snippets,
     update_meeting,
 )
 from app.services.notes import apply_generated_notes
@@ -30,7 +31,8 @@ def read_meetings(
     if sort not in {"recent", "oldest"}:
         raise HTTPException(status_code=400, detail="expected sort to be recent or oldest")
     meetings = list_meetings(db, q, from_date, to_date, sort)
-    return [card_payload(meeting) for meeting in meetings]
+    snippets = search_snippets(db, [meeting.id for meeting in meetings], q or "")
+    return [card_payload(meeting, snippets.get(meeting.id)) for meeting in meetings]
 
 
 @router.post("", status_code=201)

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { DeleteMeetingDialog, EditMeetingModal } from "@/components/CreateMeetingModal";
+import { HighlightText } from "@/components/HighlightText";
 import { api } from "@/lib/api";
 import { avatarColor, formatClock, formatDate, formatDuration, formatTimeOfDay, initials } from "@/lib/formatTime";
 import type { MeetingCard, MeetingDetail } from "@/lib/types";
@@ -11,11 +12,13 @@ import type { MeetingCard, MeetingDetail } from "@/lib/types";
 export function MeetingList({
   meetings,
   filtered,
+  query = "",
   onClear,
   onChanged,
 }: {
   meetings: MeetingCard[];
   filtered: boolean;
+  query?: string;
   onClear: () => void;
   onChanged: () => void;
 }) {
@@ -45,12 +48,24 @@ export function MeetingList({
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#6d4aff] text-xs font-semibold text-white">
               {initials(host).slice(0, 1)}
             </span>
-            <Link href={`/meetings/${meeting.id}`} className="block min-w-0 flex-1">
-              <span className="block truncate text-sm font-medium">{meeting.title}</span>
+            <Link href={query.trim() ? `/meetings/${meeting.id}?q=${encodeURIComponent(query.trim())}` : `/meetings/${meeting.id}`} className="block min-w-0 flex-1">
+              <span className="block truncate text-sm font-medium">
+                <HighlightText text={meeting.title} needle={query} />
+              </span>
               <span className="mt-0.5 block truncate text-xs text-ff-text-muted">
                 {formatDate(meeting.started_at)} · {formatTimeOfDay(meeting.started_at)} · {formatDuration(meeting.duration_seconds)}
-                {meeting.participants.length > 0 ? ` · ${meeting.participants.map((person) => person.name).join(", ")}` : ""}
+                {meeting.participants.length > 0 ? (
+                  <>
+                    {" · "}
+                    <HighlightText text={meeting.participants.map((person) => person.name).join(", ")} needle={query} />
+                  </>
+                ) : null}
               </span>
+              {meeting.snippet ? (
+                <span className="mt-1 block truncate text-xs text-ff-text-secondary">
+                  <HighlightText text={meeting.snippet} needle={query} />
+                </span>
+              ) : null}
             </Link>
             <span className="hidden items-center -space-x-2 sm:flex">
               {meeting.participants.slice(0, 4).map((person) => (
