@@ -70,7 +70,7 @@ export function MeetingsScreen() {
 
   return (
     <div className="flex h-full min-h-0 bg-ff-bg text-ff-text">
-      <aside className="hidden w-[220px] shrink-0 flex-col border-r border-ff bg-ff-sidebar px-3 py-3 lg:flex">
+      <aside className="hidden w-[220px] shrink-0 flex-col border-r border-ff bg-ff-sidebar px-3 pt-4 pb-3 lg:flex">
         <input
           value={channelQuery}
           onChange={(event) => setChannelQuery(event.target.value)}
@@ -108,25 +108,17 @@ export function MeetingsScreen() {
       </aside>
 
       <section className="flex min-w-0 flex-1 flex-col">
-        <div className="flex items-center gap-2 border-b border-ff bg-ff-bg px-4 py-2.5">
-          <button type="button" className="rounded-lg bg-ff-tab-active-bg px-3 py-1 text-[13px] text-ff-tab-active-text">
-            Hosted by me
-          </button>
-          <button type="button" onClick={() => toast("Shared meetings are coming soon")} className="rounded-lg px-3 py-1 text-[13px] text-ff-text-muted">
-            Shared with me
-          </button>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 border-b border-ff bg-ff-bg px-4 py-2">
+        <div className="flex flex-wrap items-center gap-3 border-b border-ff bg-ff-bg px-5 py-4">
           <input
             aria-label="Search meetings"
             value={q}
             placeholder="Search by title or participant"
             onChange={(event) => update({ q: event.target.value })}
-            className="min-w-[12rem] flex-1 rounded-lg border border-ff-strong bg-ff-elevated px-2 py-1 text-[13px] text-ff-text outline-none placeholder:text-ff-text-faint"
+            className="min-w-[12rem] flex-1 rounded-lg border border-ff-strong bg-ff-elevated px-3 py-2 text-[13px] text-ff-text outline-none placeholder:text-ff-text-faint"
           />
-          <input type="date" value={from} aria-label="From date" suppressHydrationWarning onChange={(event) => update({ from: event.target.value })} className="rounded-lg border border-ff-strong bg-ff-elevated px-2 py-1 text-[13px] text-ff-text" />
-          <input type="date" value={to} aria-label="To date" suppressHydrationWarning onChange={(event) => update({ to: event.target.value })} className="rounded-lg border border-ff-strong bg-ff-elevated px-2 py-1 text-[13px] text-ff-text" />
-          <select value={sort} aria-label="Sort" onChange={(event) => update({ sort: event.target.value })} className="rounded-lg border border-ff-strong bg-ff-elevated px-2 py-1 text-[13px] text-ff-text">
+          <input type="date" value={from} aria-label="From date" suppressHydrationWarning onChange={(event) => update({ from: event.target.value })} className="rounded-lg border border-ff-strong bg-ff-elevated px-3 py-2 text-[13px] text-ff-text" />
+          <input type="date" value={to} aria-label="To date" suppressHydrationWarning onChange={(event) => update({ to: event.target.value })} className="rounded-lg border border-ff-strong bg-ff-elevated px-3 py-2 text-[13px] text-ff-text" />
+          <select value={sort} aria-label="Sort" onChange={(event) => update({ sort: event.target.value })} className="rounded-lg border border-ff-strong bg-ff-elevated px-3 py-2 text-[13px] text-ff-text">
             <option value="recent">Newest</option>
             <option value="oldest">Oldest</option>
           </select>
