@@ -89,19 +89,22 @@ export function MeetingsScreen() {
                 }
                 setChannel(item.id);
               }}
-              className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] ${channel === item.id ? "bg-[#3a246b] font-medium" : "text-[#d4d4d8] hover:bg-white/5"}`}
+              className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] ${channel === item.id ? "bg-[#3a246b] font-medium text-[#e9d5ff]" : "text-[#d4d4d8] hover:bg-white/5"}`}
             >
-              <span className="text-[#a78bfa]">#</span>
+              <ChannelMark id={item.id} active={channel === item.id} />
               {item.label}
               {item.id === "uploads" ? <span className="ml-auto rounded bg-[#14532d] px-1 py-0.5 text-[9px] font-semibold text-[#86efac]">NEW</span> : null}
             </button>
           ))}
         </div>
-        <p className="mt-6 px-2 text-[11px] font-medium uppercase tracking-wide text-[#71717a]">All channels</p>
-        <p className="mt-3 px-2 text-[13px] leading-5 text-[#a1a1aa]">Create channels to organize your conversations</p>
-        <button type="button" onClick={() => toast("Channels are coming soon")} className="mx-2 mt-3 rounded-lg border border-white/10 py-1.5 text-[13px] text-[#d4d4d8]">
-          + Channel
-        </button>
+        <div className="mt-4 border-t border-white/10 pt-4">
+          <p className="px-2 text-[13px] text-[#a1a1aa]">All channels</p>
+          <p className="mt-4 text-center text-lg text-[#e879f9]">#</p>
+          <p className="mt-3 px-2 text-center text-[13px] leading-5 text-[#a1a1aa]">Create channels to organize your conversations</p>
+          <button type="button" onClick={() => toast("Channels are coming soon")} className="mx-auto mt-3 block rounded-lg border border-white/10 px-4 py-1.5 text-[13px] text-[#d4d4d8]">
+            + Channel
+          </button>
+        </div>
       </aside>
 
       <section className="flex min-w-0 flex-1 flex-col">
@@ -190,5 +193,45 @@ export function MeetingsScreen() {
       </aside>
 
     </div>
+  );
+}
+
+function ChannelMark({ id, active }: { id: string; active: boolean }) {
+  const props = {
+    width: 14,
+    height: 14,
+    viewBox: "0 0 16 16",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.4,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true as const,
+    className: active ? "text-[#e9d5ff]" : "text-[#a1a1aa]",
+  };
+  if (id === "mine") return <span className={`w-3.5 text-center text-[13px] ${active ? "text-[#e9d5ff]" : "text-[#c4b5fd]"}`}>#</span>;
+  if (id === "all") {
+    return (
+      <svg {...props}>
+        <rect x="5.2" y="5.2" width="8" height="8" rx="1.2" />
+        <path d="M3.2 10.8V3.6A1.2 1.2 0 0 1 4.4 2.4h7.2" />
+      </svg>
+    );
+  }
+  if (id === "voice") {
+    return (
+      <svg {...props}>
+        <rect x="2.2" y="5.2" width="8.2" height="8" rx="1.2" />
+        <path d="M8.2 2.4h5.2v5.2" />
+        <path d="M13.2 2.6 7.4 8.4" />
+      </svg>
+    );
+  }
+  return (
+    <svg {...props}>
+      <path d="M8 11.2V3.2" />
+      <path d="M5.2 5.6 8 2.8l2.8 2.8" />
+      <path d="M3 13.2h10" />
+    </svg>
   );
 }
