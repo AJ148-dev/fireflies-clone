@@ -5,13 +5,16 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { DeleteMeetingDialog, EditMeetingModal } from "@/components/CreateMeetingModal";
+import { ExportMenu } from "@/components/ExportMenu";
 import { Player, type PlayerHandle } from "@/components/Player";
+import { VideoPlayer } from "@/components/VideoPlayer";
 import { SummaryRail } from "@/components/SummaryRail";
 import { countMatches, Transcript } from "@/components/Transcript";
 import { useToast } from "@/components/Toast";
 import { api } from "@/lib/api";
+import { downloadMeetingExport, type ExportFormat, type ExportKind } from "@/lib/exportMeeting";
 import { activeSegmentIndex } from "@/lib/activeSegment";
-import { avatarColor, formatClock, formatDate, formatDuration, formatTimeOfDay, initials } from "@/lib/formatTime";
+import { avatarColor, formatDate, formatDuration, formatTimeOfDay, initials } from "@/lib/formatTime";
 import type { MeetingDetail } from "@/lib/types";
 
 const TOOLS = [
@@ -36,6 +39,7 @@ export function MeetingView() {
   const [deleting, setDeleting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [pane, setPane] = useState<"notes" | "transcript">("notes");
+  const [source, setSource] = useState<"audio" | "video">("audio");
   const onTime = useCallback((seconds: number) => setTime(seconds), []);
 
   useEffect(() => {
@@ -101,29 +105,12 @@ export function MeetingView() {
     setMatchCursor((current) => (current + direction + matches) % matches);
   }
 
-  function downloadNotes() {
-    const lines = [
-      meeting!.title,
-      `${formatDate(meeting!.started_at)} · ${formatDuration(meeting!.duration_seconds)}`,
-      "",
-      "Summary",
-      meeting!.summary?.body ?? "No summary.",
-      "",
-      "Action items",
-      ...meeting!.action_items.map((item) => `- [${item.is_done ? "x" : " "}] ${item.text}`),
-      "",
-      "Transcript",
-      ...meeting!.segments.map(
-        (segment) => `[${formatClock(segment.start_seconds)}] ${segment.speaker_name}: ${segment.text}`,
-      ),
-    ];
-    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `${meeting!.title}.txt`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+  function exportFile(kind: ExportKind, format: ExportFormat) {
+    downloadMeetingExport(meeting!, kind, format);
+    setMenuOpen(false);
+    const label = kind === "summary" ? "Summary" : "Transcript";
+    const extension = format === "md" ? "Markdown" : format.toUpperCase();
+    toast(`${label} downloaded as ${extension}`);
   }
 
   return (
@@ -169,9 +156,6 @@ export function MeetingView() {
               <button type="button" className="block w-full px-3 py-2 text-left hover:bg-white/5" onClick={() => { setMenuOpen(false); setEditing(true); }}>
                 Edit meeting
               </button>
-              <button type="button" className="block w-full px-3 py-2 text-left hover:bg-white/5" onClick={() => { setMenuOpen(false); downloadNotes(); toast("Notes downloaded"); }}>
-                Download notes
-              </button>
               <button type="button" className="block w-full px-3 py-2 text-left hover:bg-white/5" onClick={() => { setMenuOpen(false); toast(`${meeting.participants.length} participants · ${formatDuration(meeting.duration_seconds)}`); }}>
                 Meeting info
               </button>
@@ -182,7 +166,28 @@ export function MeetingView() {
           ) : null}
         </div>
       </header>
-      <Player src={meeting.audio_path} playerRef={playerRef} onTime={onTime} />
+      <div className="flex items-center gap-2 border-b border-white/5 bg-[#17171a] px-3 py-1.5">
+        <span className="text-[11px] font-medium tracking-wide text-[#71717a]">MEDIA</span>
+        <button
+          type="button"
+          onClick={() => setSource("audio")}
+          className={`rounded-md px-2.5 py-1 text-[13px] ${source === "audio" ? "bg-[#6d4aff] text-white" : "text-[#d4d4d8] hover:bg-white/5"}`}
+        >
+          Audio
+        </button>
+        <button
+          type="button"
+          onClick={() => setSource("video")}
+          className={`rounded-md px-2.5 py-1 text-[13px] ${source === "video" ? "bg-[#6d4aff] text-white" : "text-[#d4d4d8] hover:bg-white/5"}`}
+        >
+          Video
+        </button>
+      </div>
+      {source === "audio" ? (
+        <Player src={meeting.audio_path} playerRef={playerRef} onTime={onTime} />
+      ) : (
+        <VideoPlayer playerRef={playerRef} onTime={onTime} startAt={time} />
+      )}
       <div className="flex items-center gap-1 border-b border-white/5 px-3 xl:hidden">
         <button type="button" onClick={() => setPane("notes")} className={`border-b-2 px-3 py-2 text-[13px] ${pane === "notes" ? "border-[#6d4aff] font-medium" : "border-transparent text-[#a1a1aa]"}`}>
           Notes
@@ -223,11 +228,12 @@ export function MeetingView() {
             onSeek={(seconds) => playerRef.current?.seek(seconds)}
             onError={(message) => toast(message, "err")}
             onCopied={() => toast("Summary copied")}
+            onExport={(format) => exportFile("summary", format)}
           />
         </div>
         <section className={`${pane === "transcript" ? "flex" : "hidden"} min-h-0 min-w-0 flex-1 flex-col xl:flex xl:w-[420px] xl:flex-none xl:border-l xl:border-white/5`}>
           <div className="flex items-center gap-2 border-b border-white/5 px-3 py-2">
-            <span className="hidden text-[13px] font-medium xl:inline">Transcript</span>
+            <span className="hidden shrink-0 text-[13px] font-medium xl:inline">Transcript</span>
             <input
               value={query}
               onChange={(event) => {
@@ -235,15 +241,16 @@ export function MeetingView() {
                 setMatchCursor(0);
               }}
               placeholder="Find"
-              className="w-[180px] rounded-md border border-white/10 bg-[#1c1c20] px-2.5 py-1 text-[13px] outline-none focus:border-[#6d4aff]"
+              className="min-w-0 flex-1 rounded-md border border-white/10 bg-[#1c1c20] px-2.5 py-1 text-[13px] outline-none focus:border-[#6d4aff]"
             />
-            <span className="text-[11px] text-[#a1a1aa]">{query.trim() ? `${matches} found` : ""}</span>
-            <button type="button" onClick={() => step(-1)} disabled={!matches} className="text-[11px] text-[#d4d4d8] disabled:text-[#3f3f46]">
+            <span className="shrink-0 text-[11px] text-[#a1a1aa]">{query.trim() ? `${matches} found` : ""}</span>
+            <button type="button" onClick={() => step(-1)} disabled={!matches} className="shrink-0 text-[11px] text-[#d4d4d8] disabled:text-[#3f3f46]">
               Prev
             </button>
-            <button type="button" onClick={() => step(1)} disabled={!matches} className="text-[11px] text-[#d4d4d8] disabled:text-[#3f3f46]">
+            <button type="button" onClick={() => step(1)} disabled={!matches} className="shrink-0 text-[11px] text-[#d4d4d8] disabled:text-[#3f3f46]">
               Next
             </button>
+            <ExportMenu kind="transcript" onExport={(format) => exportFile("transcript", format)} />
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
             <Transcript

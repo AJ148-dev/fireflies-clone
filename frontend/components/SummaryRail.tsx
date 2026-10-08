@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 
+import { ExportMenu } from "@/components/ExportMenu";
 import { api } from "@/lib/api";
+import type { ExportFormat } from "@/lib/exportMeeting";
 import { formatClock } from "@/lib/formatTime";
 import type { ActionItem, MeetingDetail } from "@/lib/types";
 
@@ -12,12 +14,14 @@ export function SummaryRail({
   onSeek,
   onError,
   onCopied,
+  onExport,
 }: {
   meeting: MeetingDetail;
   onChange: (meeting: MeetingDetail) => void;
   onSeek: (seconds: number) => void;
   onError: (message: string) => void;
   onCopied: () => void;
+  onExport: (format: ExportFormat) => void;
 }) {
   const [draft, setDraft] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -51,10 +55,14 @@ export function SummaryRail({
 
   return (
     <aside className="flex h-full min-h-0 min-w-0 flex-col bg-[#121214]">
-      <div className="flex justify-end px-8 pt-3">
-        <button type="button" onClick={() => void copySummary()} className="text-[12px] text-[#a1a1aa] hover:text-white">
-          Copy
-        </button>
+      <div className="flex items-center gap-2 px-8 pt-3">
+        <span className="text-[13px] font-medium">Summary</span>
+        <div className="ml-auto flex items-center gap-2">
+          <ExportMenu kind="summary" onExport={onExport} />
+          <button type="button" onClick={() => void copySummary()} className="text-[12px] text-[#a1a1aa] hover:text-white">
+            Copy
+          </button>
+        </div>
       </div>
       <div id="outline" className="mx-auto flex w-full max-w-3xl flex-col gap-8 overflow-y-auto px-8 py-4">
         {sections.map((section, index) => (
